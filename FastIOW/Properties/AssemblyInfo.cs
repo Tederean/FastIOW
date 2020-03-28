@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FastIOW")]
-[assembly: AssemblyDescription("Library for easy, arduino-like access to IOWarrior devices")]
+[assembly: AssemblyDescription(".NET Standard Library for easy, arduino-like access to IOWarrior devices")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FastIOW")]
