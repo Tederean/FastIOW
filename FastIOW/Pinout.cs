@@ -184,20 +184,20 @@ namespace Tederean.FastIOW
       public const int P5_7 = 6 * 8 + 7;
 
       /// <summary>
-      /// On some boards P6.0 is labled as P7.0.
+      /// On some boards P6.0 is labeled as P7.0.
       /// </summary>
       public const int P6_0 = 7 * 8 + 0;
       /// <summary>
-      /// On some boards P6.7 is labled as P7.7.
+      /// On some boards P6.7 is labeled as P7.7.
       /// </summary>
       public const int P6_7 = 7 * 8 + 7;
 
       /// <summary>
-      /// On some boards P6.0 is labled as P7.0.
+      /// On some boards P6.0 is labeled as P7.0.
       /// </summary>
       public const int P7_0 = P6_0;
       /// <summary>
-      /// On some boards P6.7 is labled as P7.7.
+      /// On some boards P6.7 is labeled as P7.7.
       /// </summary>
       public const int P7_7 = P6_7;
 

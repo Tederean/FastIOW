@@ -99,7 +99,7 @@ namespace Tederean.FastIOW
     private void CheckClosed()
     {
       if (!Connected)
-        throw new InvalidOperationException(Type.Name + " (ID:" + Type.Id + " SN:" + SerialNumber + ") is already closed.");
+        throw new InvalidOperationException(Type.Name + " (ID: " + Type.Id + " SN: " + SerialNumber + ") is already closed.");
     }
 
     private void CheckPipe(Pipe pipe)
@@ -142,7 +142,7 @@ namespace Tederean.FastIOW
         throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
       }
 
-      if (Type == IOWarriorType.IOWarrior28L && pin > Pinout.IOWarrior28.P1_7 && pin != Pinout.IOWarrior28L.P2_1)
+      if (Type == IOWarriorType.IOWarrior28L && pin > Pinout.IOWarrior28L.P1_7 && pin != Pinout.IOWarrior28L.P2_1)
       {
         throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
       }
@@ -258,7 +258,7 @@ namespace Tederean.FastIOW
     public void I2CWriteBytes(byte address, params byte[] data)
     {
       if (!I2CEnabled) throw new InvalidOperationException("I2C is not enabled.");
-      if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + address);
+      if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
       if (data.Length > (Type.I2CPacketLength - 1)) throw new ArgumentException("Data length must be between 0 and " + (Type.I2CPacketLength -1) + ".");
 
       var report = NewReport(Type.I2CPipe);
@@ -299,16 +299,16 @@ namespace Tederean.FastIOW
     }
 
     /// <summary>
-    /// Read in bytes from given 7bit I2C address. Size of returned read in array
-    /// equals parameter length, set to value from 0 to 6.
+    /// Read in bytes from given 7bit I2C address. Size of
+    /// returned read in array equals parameter length.
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
     public byte[] I2CReadBytes(byte address, int length)
     {
       if (!I2CEnabled) throw new InvalidOperationException("I2C is not enabled.");
-      if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + address);
-      if (length > (Type.I2CPacketLength - 1) || length < 0) throw new ArgumentException("Data length must be between 0 and " + (Type.I2CPacketLength - 1) + ".");
+      if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
+      if (length > Type.I2CPacketLength || length < 0) throw new ArgumentException("Data length must be between 0 and " + Type.I2CPacketLength + ".");
 
       var report = NewReport(Type.I2CPipe);
 
