@@ -251,7 +251,7 @@ namespace Tederean.FastIOW
     }
 
     /// <summary>
-    /// Write bytes to given 7bit I2C address. Length of data byte array can reach from 0 to 6.
+    /// Write bytes to given 7bit I2C address.
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
@@ -259,7 +259,7 @@ namespace Tederean.FastIOW
     {
       if (!I2CEnabled) throw new InvalidOperationException("I2C is not enabled.");
       if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + address);
-      if (data.Length > 6) throw new ArgumentException("Data length must be between 0 and 6.");
+      if (data.Length > (Type.I2CPacketLength - 1)) throw new ArgumentException("Data length must be between 0 and " + (Type.I2CPacketLength -1) + ".");
 
       var report = NewReport(Type.I2CPipe);
 
@@ -288,6 +288,14 @@ namespace Tederean.FastIOW
       {
         throw new IOException("Error while writing data.");
       }
+
+      if (Type == IOWarriorType.IOWarrior56 || Type == IOWarriorType.IOWarrior28)
+      {
+        if (result[1].GetBit(6))
+        {
+          throw new IOException("Error while writing data, arbitration lost.");
+        }
+      }
     }
 
     /// <summary>
@@ -300,7 +308,7 @@ namespace Tederean.FastIOW
     {
       if (!I2CEnabled) throw new InvalidOperationException("I2C is not enabled.");
       if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + address);
-      if (length > 6 || length < 0) throw new ArgumentException("Data length must be between 0 and 6.");
+      if (length > (Type.I2CPacketLength - 1) || length < 0) throw new ArgumentException("Data length must be between 0 and " + (Type.I2CPacketLength - 1) + ".");
 
       var report = NewReport(Type.I2CPipe);
 
@@ -312,7 +320,10 @@ namespace Tederean.FastIOW
       report[2] = (byte)(address << 1);
       report[2].SetBit(0, true); // true -> read
 
-      report[3] = (byte)length; // Amount of bytes to read
+      if (Type == IOWarriorType.IOWarrior28)
+      {
+        report[3] = (byte)length; // Amount of bytes to read
+      }
 
       WriteReport(report, Type.I2CPipe);
 
@@ -321,6 +332,11 @@ namespace Tederean.FastIOW
       if (result[1].GetBit(7))
       {
         throw new IOException("Error while reading data.");
+      }
+
+      if (Type == IOWarriorType.IOWarrior56 && result[1].GetBit(6))
+      {
+        throw new IOException("Error while reading data, arbitration lost.");
       }
 
       return result.Skip(2).Take(length).ToArray();
