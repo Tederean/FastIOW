@@ -27,12 +27,12 @@ namespace Tederean.FastIOW
   public static class PinState
   {
     /// <summary>
-    /// Represents low driving pin state.
+    /// Represents a pin pulled to low potential by open drain circuit.
     /// </summary>
     public static readonly bool LOW = false;
 
     /// <summary>
-    /// Represents high driving pin state.
+    /// Represents a pin pulled to high potential by pullup resistor.
     /// </summary>
     public static readonly bool HIGH = true;
   }

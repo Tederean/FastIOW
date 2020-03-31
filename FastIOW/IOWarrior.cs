@@ -119,20 +119,33 @@ namespace Tederean.FastIOW
     {
       if (pin < 8)
       {
-        throw new ArgumentNullException("Non existing pin.");
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
       }
 
-      if (Type == IOWarriorType.IOWarrior24 && pin > 23)
+      if (Type == IOWarriorType.IOWarrior40 && pin > Pinout.IOWarrior40.P3_7)
       {
-        throw new ArgumentNullException("Non existing pin on " + Type.Name + ".");
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
       }
 
-      if (Type == IOWarriorType.IOWarrior28 && pin > 25)
+      if (Type == IOWarriorType.IOWarrior24 && pin > Pinout.IOWarrior24.P1_7)
       {
-        throw new ArgumentNullException("Non existing pin on " + Type.Name + ".");
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
       }
 
-      // TODO: Add other iows here...
+      if (Type == IOWarriorType.IOWarrior56 && pin > Pinout.IOWarrior56.P6_0 && pin != Pinout.IOWarrior56.P6_7)
+      {
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+      }
+
+      if (Type == IOWarriorType.IOWarrior28 && pin > Pinout.IOWarrior28.P2_1 && pin != Pinout.IOWarrior28.P3_7)
+      {
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+      }
+
+      if (Type == IOWarriorType.IOWarrior28L && pin > Pinout.IOWarrior28.P1_7 && pin != Pinout.IOWarrior28L.P2_1)
+      {
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+      }
     }
 
     /// <summary>
@@ -349,7 +362,6 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns state of input output pin.
     /// See static class Pinout for pin definitions.
-    /// Call this method only if output is set to high.
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
@@ -357,11 +369,6 @@ namespace Tederean.FastIOW
     {
       CheckPin(pin);
       CheckClosed();
-
-      if (!IOPinsWriteReport[pin / 8].GetBit(pin % 8))
-      {
-        throw new InvalidOperationException("Cannot read pin while it's output is low.");
-      }
 
       byte[] report;
       if (ReadReportNonBlocking(Pipe.IO_PINS, out report))
