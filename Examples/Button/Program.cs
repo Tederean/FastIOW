@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using Tederean.FastIOW;
 
 namespace Button
@@ -43,20 +42,23 @@ namespace Button
 
       PrintInfos();
 
-      IOWarrior[] iows = FastIOW.GetIOWarriors();
-
-      while (!Console.KeyAvailable)
+      foreach (var iow in FastIOW.GetIOWarriors())
       {
-        foreach (var iow in iows)
-        {
-          bool button = iow.DigitalRead(ButtonDefinitions[iow.Type]);
-          iow.DigitalWrite(LedDefinitions[iow.Type], button);
-        }
-
-        Thread.Sleep(10);
+        iow.PinStateChange += OnPinStateChange;
       }
 
+      Console.WriteLine("\nPress any key to exit.");
+      Console.ReadKey();
+
       FastIOW.CloseConnection();
+    }
+
+    private static void OnPinStateChange(object sender, PinStateChangeEventArgs args)
+    {
+      if (args.Pin == ButtonDefinitions[args.IOWarrior.Type])
+      {
+        args.IOWarrior.DigitalWrite(LedDefinitions[args.IOWarrior.Type], args.NewPinState);
+      }
     }
 
     private static void PrintInfos()
@@ -67,8 +69,6 @@ namespace Button
       {
         Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|", iow.Type.Name, string.Format("0x{0:X8}", iow.Type.Id), iow.SerialNumber));
       }
-
-      Console.WriteLine("\nPress any key to exit.");
     }
   }
 }

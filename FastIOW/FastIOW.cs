@@ -69,7 +69,7 @@ namespace Tederean.FastIOW
     /// </summary>
     public static void CloseConnection()
     {
-      m_IOWarriors.ForEach(entry => entry.Connected = false);
+      m_IOWarriors.ForEach(entry => entry.Disconnect());
       m_IOWarriors.Clear();
 
       if (m_DevHandle != 0x0)

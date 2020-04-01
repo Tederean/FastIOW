@@ -22,6 +22,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Tederean.FastIOW.Internal;
 
 namespace Tederean.FastIOW
@@ -51,7 +52,7 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns true if this device is connected, otherwise false.
     /// </summary>
-    public bool Connected { get; internal set; }
+    public bool Connected { get; private set; }
 
     /// <summary>
     /// Returns true if I2C interface is enabled, otherwise false.
@@ -69,6 +70,15 @@ namespace Tederean.FastIOW
     /// Modify it only if you know what you are doing.
     /// </summary>
     public byte[] IOPinsReadReport { get; private set; }
+
+
+    private Thread IOThread { get; set; }
+
+
+    /// <summary>
+    /// Event that gets triggered when a pin changes its state.
+    /// </summary>
+    public event EventHandler<PinStateChangeEventArgs> PinStateChange;
 
 
     internal IOWarrior(int index)
@@ -94,6 +104,9 @@ namespace Tederean.FastIOW
 
       IOPinsWriteReport = result.ToArray();
       IOPinsReadReport = result.ToArray();
+
+      IOThread = new Thread(ProcessIO);
+      IOThread.Start();
     }
 
     private void CheckClosed()
@@ -115,36 +128,77 @@ namespace Tederean.FastIOW
       }
     }
 
-    private void CheckPin(int pin)
+    private bool CheckPin(int pin)
     {
       if (pin < 8)
       {
-        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+        return false;
       }
 
       if (Type == IOWarriorType.IOWarrior40 && pin > Pinout.IOWarrior40.P3_7)
       {
-        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+        return false;
       }
 
       if (Type == IOWarriorType.IOWarrior24 && pin > Pinout.IOWarrior24.P1_7)
       {
-        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+        return false;
       }
 
       if (Type == IOWarriorType.IOWarrior56 && pin > Pinout.IOWarrior56.P6_0 && pin != Pinout.IOWarrior56.P6_7)
       {
-        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+        return false;
       }
 
       if (Type == IOWarriorType.IOWarrior28 && pin > Pinout.IOWarrior28.P2_1 && pin != Pinout.IOWarrior28.P3_7)
       {
-        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+        return false;
       }
 
       if (Type == IOWarriorType.IOWarrior28L && pin > Pinout.IOWarrior28L.P1_7 && pin != Pinout.IOWarrior28L.P2_1)
       {
-        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+        return false;
+      }
+
+      return true;
+    }
+
+    internal void Disconnect()
+    {
+      PinStateChange?.GetInvocationList().ToList().ForEach(d => PinStateChange -= (EventHandler<PinStateChangeEventArgs>)d);
+
+      Connected = false;
+
+      IOThread.Abort();
+      IOThread = null;
+    }
+
+    private void ProcessIO()
+    {
+      while (Connected)
+      {
+        try
+        {
+          var result = ReadReport(Pipe.IO_PINS);
+
+          for (int index = 1; index < result.Length; index++)
+          {
+            foreach (var bit in Enumerable.Range(0, 7))
+            {
+              bool newState = result[index].GetBit(bit);
+              bool oldState = IOPinsReadReport[index].GetBit(bit);
+              int pin = index * 8 + bit;
+
+              if (CheckPin(pin) && newState != oldState)
+              {
+                IOPinsReadReport[index].SetBit(bit, newState);
+
+                PinStateChange?.Invoke(this, new PinStateChangeEventArgs(this, pin, newState, oldState));
+              }
+            }
+          }
+        }
+        catch (Exception) { }
       }
     }
 
@@ -379,7 +433,11 @@ namespace Tederean.FastIOW
     /// <exception cref="IOException"/>
     public void DigitalWrite(int pin, bool state)
     {
-      CheckPin(pin);
+      if (!CheckPin(pin))
+      {
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
+      }
+
       CheckClosed();
 
       if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != state)
@@ -397,17 +455,14 @@ namespace Tederean.FastIOW
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="IOException"/>
     public bool DigitalRead(int pin)
     {
-      CheckPin(pin);
-      CheckClosed();
-
-      byte[] report;
-      if (ReadReportNonBlocking(Pipe.IO_PINS, out report))
+      if (!CheckPin(pin))
       {
-        IOPinsReadReport = report;
+        throw new ArgumentNullException("Pin not existing on " + Type.Name + ".");
       }
+
+      CheckClosed();
 
       return IOPinsReadReport[pin / 8].GetBit(pin % 8);
     }
