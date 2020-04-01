@@ -173,12 +173,16 @@ namespace Tederean.FastIOW
     /// <exception cref="ArgumentNullException"/>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public void WriteReport(byte[] report, Pipe pipe)
     {
       CheckClosed();
       CheckPipe(pipe);
 
-      NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, report.Length);
+      if (report.Length != NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, report.Length))
+      {
+        throw new IOException("Error while writing data.");
+      }
     }
 
     /// <summary>
@@ -188,6 +192,7 @@ namespace Tederean.FastIOW
     /// <exception cref="ArgumentNullException"/>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public byte[] ReadReport(Pipe pipe)
     {
       CheckClosed();
@@ -195,7 +200,11 @@ namespace Tederean.FastIOW
 
       var report = NewReport(pipe);
 
-      NativeLib.IowKitRead(IOWHandle, pipe.Id, report, report.Length);
+      if (report.Length != NativeLib.IowKitRead(IOWHandle, pipe.Id, report, report.Length))
+      {
+        throw new IOException("Error while reading data.");
+      }
+
       return report;
     }
 
@@ -207,6 +216,7 @@ namespace Tederean.FastIOW
     /// <exception cref="ArgumentNullException"/>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public bool ReadReportNonBlocking(Pipe pipe, out byte[] report)
     {
       CheckClosed();
@@ -221,6 +231,7 @@ namespace Tederean.FastIOW
     /// Enable I2C interface on this IOWarrior device.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public void EnableI2C()
     {
       var report = NewReport(Type.I2CPipe);
@@ -237,6 +248,7 @@ namespace Tederean.FastIOW
     /// Disable I2C interface on this IOWarrior device.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public void DisableI2C()
     {
       if (!I2CEnabled) return;
@@ -255,6 +267,7 @@ namespace Tederean.FastIOW
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public void I2CWriteBytes(byte address, params byte[] data)
     {
       if (!I2CEnabled) throw new InvalidOperationException("I2C is not enabled.");
@@ -304,6 +317,7 @@ namespace Tederean.FastIOW
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public byte[] I2CReadBytes(byte address, int length)
     {
       if (!I2CEnabled) throw new InvalidOperationException("I2C is not enabled.");
@@ -347,6 +361,7 @@ namespace Tederean.FastIOW
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public ushort I2CRead2Bytes(byte address)
     {
       var result = I2CReadBytes(address, 2);
@@ -361,6 +376,7 @@ namespace Tederean.FastIOW
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public void DigitalWrite(int pin, bool state)
     {
       CheckPin(pin);
@@ -381,6 +397,7 @@ namespace Tederean.FastIOW
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
     public bool DigitalRead(int pin)
     {
       CheckPin(pin);
