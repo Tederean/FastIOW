@@ -99,7 +99,7 @@ namespace Tederean.FastIOW
     private void CheckClosed()
     {
       if (!Connected)
-        throw new InvalidOperationException(Type.Name + " (ID: " + Type.Id + " SN: " + SerialNumber + ") is already closed.");
+        throw new InvalidOperationException(Type.Name + " (ID: " + string.Format("0x{0:X8}", Type.Id) + " SN: " + SerialNumber + ") is already closed.");
     }
 
     private void CheckPipe(Pipe pipe)

@@ -5,6 +5,14 @@ VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastIOW", "FastIOW\FastIOW.csproj", "{83EB95D8-EA60-4D21-B2A2-1FF65255F98B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{08D5D04A-D085-4DD3-A9DE-A47DF7C1A001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Button", "Examples\Button\Button.csproj", "{0344D170-AFE2-46C5-B153-9EDA4ECE70D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blink", "Examples\Blink\Blink.csproj", "{19679821-89C7-40F0-83BB-5FAA0FB9A967}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I2C-Scan", "Examples\I2C-Scan\I2C-Scan.csproj", "{40F00CF0-9751-47CE-9FD9-43E47CF6DF32}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +23,26 @@ Global
 		{83EB95D8-EA60-4D21-B2A2-1FF65255F98B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83EB95D8-EA60-4D21-B2A2-1FF65255F98B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83EB95D8-EA60-4D21-B2A2-1FF65255F98B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0344D170-AFE2-46C5-B153-9EDA4ECE70D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0344D170-AFE2-46C5-B153-9EDA4ECE70D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0344D170-AFE2-46C5-B153-9EDA4ECE70D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0344D170-AFE2-46C5-B153-9EDA4ECE70D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19679821-89C7-40F0-83BB-5FAA0FB9A967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19679821-89C7-40F0-83BB-5FAA0FB9A967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19679821-89C7-40F0-83BB-5FAA0FB9A967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19679821-89C7-40F0-83BB-5FAA0FB9A967}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40F00CF0-9751-47CE-9FD9-43E47CF6DF32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40F00CF0-9751-47CE-9FD9-43E47CF6DF32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40F00CF0-9751-47CE-9FD9-43E47CF6DF32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40F00CF0-9751-47CE-9FD9-43E47CF6DF32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0344D170-AFE2-46C5-B153-9EDA4ECE70D5} = {08D5D04A-D085-4DD3-A9DE-A47DF7C1A001}
+		{19679821-89C7-40F0-83BB-5FAA0FB9A967} = {08D5D04A-D085-4DD3-A9DE-A47DF7C1A001}
+		{40F00CF0-9751-47CE-9FD9-43E47CF6DF32} = {08D5D04A-D085-4DD3-A9DE-A47DF7C1A001}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95645FCD-F4F6-40A1-8A3C-FACC6131D16F}
