@@ -49,9 +49,11 @@
     <Compile Include="Boards\IOWarrior28L.cs" />
     <Compile Include="Boards\IOWarrior28.cs" />
     <Compile Include="Boards\IOWarrior56.cs" />
+    <Compile Include="Devices\PWMDevice.cs" />
     <Compile Include="EventArgs\PinStateChangeEventArgs.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="FastIOW.cs" />
+    <Compile Include="Interfaces\PWMInterface.cs" />
     <Compile Include="Internal\ADCInterfaceImplementation.cs" />
     <Compile Include="Internal\Enumeration.cs" />
     <Compile Include="Internal\NativeLib.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="Boards\IOWarrior24.cs" />
     <Compile Include="Boards\IOWarrior40.cs" />
     <Compile Include="Internal\IOWarriorBase.cs" />
+    <Compile Include="Internal\PWMInterfaceImplementation.cs" />
     <Compile Include="IOWarriorType.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

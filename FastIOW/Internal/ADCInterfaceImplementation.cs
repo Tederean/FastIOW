@@ -24,7 +24,7 @@ using System.Diagnostics;
 namespace Tederean.FastIOW.Internal
 {
 
-  class ADCInterfaceImplementation : ADCInterface
+  public class ADCInterfaceImplementation : ADCInterface
   {
 
     public bool Enabled { get; private set; }

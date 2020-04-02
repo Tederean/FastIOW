@@ -50,9 +50,8 @@ namespace Tederean.FastIOW.Internal
     {
       var report = IOWarrior.NewReport(I2CPipe);
 
-      // I2C Enable
-      report[0] = 0x01;
-      report[1] = 0x01;
+      report[0] = 0x01; // I2C
+      report[1] = 0x01; // Enable
 
       IOWarrior.WriteReport(report, I2CPipe);
       Enabled = true;
@@ -64,8 +63,8 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(I2CPipe);
 
-      // I2C Disable
-      report[0] = 0x01;
+      report[0] = 0x01; // I2C
+      report[1] = 0x00; // Disable
 
       IOWarrior.WriteReport(report, I2CPipe);
       Enabled = false;
