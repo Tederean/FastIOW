@@ -22,14 +22,14 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Represents an IOWarrior model.
+  /// A IOWarrior that offers an ADC interface.
   /// </summary>
-  public enum IOWarriorType
+  public interface ADCDevice
   {
-    IOWarrior40 = 0x1500,
-    IOWarrior24 = 0x1501,
-    IOWarrior56 = 0x1503,
-    IOWarrior28 = 0x1504,
-    IOWarrior28L = 0x1505,
+
+    /// <summary>
+    /// Returns IOWarriors ADC interface.
+    /// </summary>
+    ADCInterface ADCInterface { get;  }
   }
 }

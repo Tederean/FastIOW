@@ -33,7 +33,7 @@ namespace Tederean.FastIOW
 
     private static int m_DevHandle;
 
-    private static readonly List<IOWarrior> m_IOWarriors = new List<IOWarrior>();
+    private static readonly List<IOWarriorBase> m_IOWarriors = new List<IOWarriorBase>();
 
     /// <summary>
     /// Returns true if connected to at least one IOWarrior, otherwise false.
@@ -58,7 +58,33 @@ namespace Tederean.FastIOW
 
       for (int index = 0; index < deviceCount; index++)
       {
-        m_IOWarriors.Add(new IOWarrior(index));
+        int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
+        IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
+
+        if (id == IOWarriorType.IOWarrior40)
+        {
+          m_IOWarriors.Add(new IOWarrior40(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior24)
+        {
+          m_IOWarriors.Add(new IOWarrior24(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior56)
+        {
+          m_IOWarriors.Add(new IOWarrior56(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior28)
+        {
+          m_IOWarriors.Add(new IOWarrior28(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior28L)
+        {
+          m_IOWarriors.Add(new IOWarrior28L(handle));
+        }
       }
 
       return true;

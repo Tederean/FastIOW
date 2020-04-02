@@ -34,6 +34,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,17 +44,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Devices\ADCDevice.cs" />
+    <Compile Include="Devices\I2CDevice.cs" />
+    <Compile Include="Boards\IOWarrior28L.cs" />
+    <Compile Include="Boards\IOWarrior28.cs" />
+    <Compile Include="Boards\IOWarrior56.cs" />
     <Compile Include="EventArgs\PinStateChangeEventArgs.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="FastIOW.cs" />
     <Compile Include="Internal\Enumeration.cs" />
     <Compile Include="Internal\NativeLib.cs" />
-    <Compile Include="IOWarrior.cs" />
+    <Compile Include="Interfaces\ADCInterface.cs" />
+    <Compile Include="Interfaces\I2CInterface.cs" />
+    <Compile Include="Internal\I2CInterfaceImplementation.cs" />
+    <Compile Include="Boards\IOWarrior.cs" />
+    <Compile Include="Boards\IOWarrior24.cs" />
+    <Compile Include="Boards\IOWarrior40.cs" />
+    <Compile Include="Internal\IOWarriorBase.cs" />
     <Compile Include="IOWarriorType.cs" />
-    <Compile Include="Pinout.cs" />
-    <Compile Include="PinState.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

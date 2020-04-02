@@ -25,24 +25,26 @@ namespace Button
 
       Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", "Name", "Unique Identifier", "Serial Number", "I2C Address"));
 
-      foreach (IOWarrior iow in FastIOW.GetIOWarriors())
+      foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is I2CDevice))
       {
-        iow.EnableI2C();
+        I2CInterface i2c = (iow as I2CDevice).I2CInterface;
+
+        i2c.Enable();
 
         foreach (byte address in Enumerable.Range(0, 127))
         {
           try
           {
             // Throws IOException when I2C device is not responding.
-            iow.I2CWriteBytes(address);
+            i2c.WriteBytes(address);
 
             // This is only called when I2C device send a response.
-            Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", iow.Type.Name, string.Format("0x{0:X8}", iow.Type.Id), iow.SerialNumber, string.Format("0x{0:X2}", address)));
+            Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", iow.Name, string.Format("0x{0:X8}", iow.Id), iow.SerialNumber, string.Format("0x{0:X2}", address)));
           }
           catch (IOException) { }
         }
 
-        iow.DisableI2C();
+        i2c.Disable();
       }
 
       FastIOW.CloseConnection();

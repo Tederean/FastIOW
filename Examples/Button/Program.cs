@@ -10,22 +10,20 @@ namespace Button
 
     private static readonly Dictionary<IOWarriorType, int> LedDefinitions = new Dictionary<IOWarriorType, int>()
     {
-      { IOWarriorType.IOWarrior40, Pinout.IOWarrior40.BUILDIN_LED0 },
-      { IOWarriorType.IOWarrior24, Pinout.IOWarrior24.BUILDIN_LED },
-      { IOWarriorType.IOWarrior56, Pinout.IOWarrior56.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28, Pinout.IOWarrior28.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28L, Pinout.IOWarrior28L.P0_1 },
-      { IOWarriorType.Unknown, -1 },
+      { IOWarriorType.IOWarrior40, IOWarrior40.BUILDIN_LED0 },
+      { IOWarriorType.IOWarrior24, IOWarrior24.BUILDIN_LED },
+      { IOWarriorType.IOWarrior56, IOWarrior56.BUILDIN_LED },
+      { IOWarriorType.IOWarrior28, IOWarrior28.BUILDIN_LED },
+      { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_1 }
     };
 
     private static readonly Dictionary<IOWarriorType, int> ButtonDefinitions = new Dictionary<IOWarriorType, int>()
     {
-      { IOWarriorType.IOWarrior40, Pinout.IOWarrior40.BUILDIN_BUTTON },
-      { IOWarriorType.IOWarrior24, Pinout.IOWarrior24.P0_0 },
-      { IOWarriorType.IOWarrior56, Pinout.IOWarrior56.BUILDIN_BUTTON },
-      { IOWarriorType.IOWarrior28, Pinout.IOWarrior28.BUILDIN_BUTTON },
-      { IOWarriorType.IOWarrior28L, Pinout.IOWarrior28L.P0_0 },
-      { IOWarriorType.Unknown, -1 },
+      { IOWarriorType.IOWarrior40, IOWarrior40.BUILDIN_BUTTON },
+      { IOWarriorType.IOWarrior24, IOWarrior24.P0_0 },
+      { IOWarriorType.IOWarrior56, IOWarrior56.BUILDIN_BUTTON },
+      { IOWarriorType.IOWarrior28, IOWarrior28.BUILDIN_BUTTON },
+      { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_0 }
     };
 
 
@@ -67,7 +65,7 @@ namespace Button
 
       foreach (var iow in FastIOW.GetIOWarriors())
       {
-        Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|", iow.Type.Name, string.Format("0x{0:X8}", iow.Type.Id), iow.SerialNumber));
+        Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|", iow.Name, string.Format("0x{0:X8}", iow.Id), iow.SerialNumber));
       }
     }
   }

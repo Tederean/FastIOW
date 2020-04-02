@@ -22,18 +22,36 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Represents a digital pin state.
+  /// Represents a ADC interface of an IOWarrior.
   /// </summary>
-  public static class PinState
+  public interface ADCInterface
   {
-    /// <summary>
-    /// Represents a pin pulled to low potential by open drain circuit.
-    /// </summary>
-    public static readonly bool LOW = false;
 
     /// <summary>
-    /// Represents a pin pulled to high potential by pullup resistor.
+    /// Returns true if internal analog to digital converter is enabled, otherwise false.
     /// </summary>
-    public static readonly bool HIGH = true;
+    bool Enabled { get; }
+
+    /// <summary>
+    /// Enable ADC interface on this IOWarrior device.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    void Enable();
+
+    /// <summary>
+    /// Disable ADC interface on this IOWarrior device.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    void Disable();
+
+    /// <summary>
+    /// Returns analog 16bit value of given pin. Value ranges from GND to VCC.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="IOException"/>
+    ushort AnalogRead(int pin);
   }
 }

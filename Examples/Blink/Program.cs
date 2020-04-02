@@ -11,12 +11,11 @@ namespace Button
 
     private static readonly Dictionary<IOWarriorType, int> LedDefinitions = new Dictionary<IOWarriorType, int>()
     {
-      { IOWarriorType.IOWarrior40, Pinout.IOWarrior40.BUILDIN_LED0 },
-      { IOWarriorType.IOWarrior24, Pinout.IOWarrior24.BUILDIN_LED },
-      { IOWarriorType.IOWarrior56, Pinout.IOWarrior56.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28, Pinout.IOWarrior28.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28L, Pinout.IOWarrior28L.P0_0 },
-      { IOWarriorType.Unknown, -1 },
+      { IOWarriorType.IOWarrior40, IOWarrior40.BUILDIN_LED0 },
+      { IOWarriorType.IOWarrior24, IOWarrior24.BUILDIN_LED },
+      { IOWarriorType.IOWarrior56, IOWarrior56.BUILDIN_LED },
+      { IOWarriorType.IOWarrior28, IOWarrior28.BUILDIN_LED },
+      { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_0 }
     };
 
 
@@ -39,14 +38,14 @@ namespace Button
       {
         foreach (var iow in iows)
         {
-          iow.DigitalWrite(LedDefinitions[iow.Type], PinState.LOW);
+          iow.DigitalWrite(LedDefinitions[iow.Type], iow.LOW);
         }
 
         Thread.Sleep(500);
 
         foreach (var iow in iows)
         {
-          iow.DigitalWrite(LedDefinitions[iow.Type], PinState.HIGH);
+          iow.DigitalWrite(LedDefinitions[iow.Type], iow.HIGH);
         }
 
         Thread.Sleep(500);
@@ -61,7 +60,7 @@ namespace Button
 
       foreach (var iow in FastIOW.GetIOWarriors())
       {
-        Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|", iow.Type.Name, string.Format("0x{0:X8}", iow.Type.Id), iow.SerialNumber));
+        Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|", iow.Name, string.Format("0x{0:X8}", iow.Id), iow.SerialNumber));
       }
 
       Console.WriteLine("\nPress any key to exit.");
