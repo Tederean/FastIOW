@@ -52,6 +52,7 @@
     <Compile Include="EventArgs\PinStateChangeEventArgs.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="FastIOW.cs" />
+    <Compile Include="Internal\ADCInterfaceImplementation.cs" />
     <Compile Include="Internal\Enumeration.cs" />
     <Compile Include="Internal\NativeLib.cs" />
     <Compile Include="Interfaces\ADCInterface.cs" />

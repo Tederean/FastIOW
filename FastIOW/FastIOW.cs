@@ -106,7 +106,7 @@ namespace Tederean.FastIOW
     }
 
     /// <summary>
-    /// Returns an array containing all connected IOWarriors.
+    /// Returns an array that contains all connected and supported IOWarriors at the same time.
     /// </summary>
     public static IOWarrior[] GetIOWarriors()
     {

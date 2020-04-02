@@ -19,6 +19,7 @@
  *
  */
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -99,6 +100,13 @@ namespace Tederean.FastIOW.Internal
 
       var result = IOWarrior.ReadReport(I2CPipe);
 
+      if (result[0] != 0x02)
+      {
+        if (Debugger.IsAttached) Debugger.Break();
+
+        throw new InvalidOperationException("Recieved wrong packet!");
+      }
+
       if (result[1].GetBit(7))
       {
         throw new IOException("Error while writing data.");
@@ -137,6 +145,13 @@ namespace Tederean.FastIOW.Internal
       IOWarrior.WriteReport(report, I2CPipe);
 
       var result = IOWarrior.ReadReport(I2CPipe);
+
+      if (result[0] != 0x03)
+      {
+        if (Debugger.IsAttached) Debugger.Break();
+
+        throw new InvalidOperationException("Recieved wrong packet!");
+      }
 
       if (result[1].GetBit(7))
       {
