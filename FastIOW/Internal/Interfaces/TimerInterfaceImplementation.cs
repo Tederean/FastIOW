@@ -47,7 +47,7 @@ namespace Tederean.FastIOW.Internal
 
     public int PulseIn(int pin, bool value, TimeSpan timeout)
     {
-      return PulseIn(pin, value, TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(10));
+      return PulseIn(pin, value, timeout, TimeSpan.FromMilliseconds(10));
     }
 
     public int PulseIn(int pin, bool value, TimeSpan timeout, TimeSpan interval)
@@ -104,15 +104,16 @@ namespace Tederean.FastIOW.Internal
     {
       var falling = BytesToInt(report[2], report[3], report[4]);
       var rising = BytesToInt(report[5], report[6], report[7]);
+      var timePerTick = 4; // 4 us per tick
 
       if (value && rising < falling)
       {
-        return falling - rising;
+        return (falling - rising) * timePerTick;
       }
 
       if (!value && rising > falling)
       {
-        return rising - falling;
+        return (rising - falling) * timePerTick;
       }
 
       return -1;
