@@ -49,6 +49,8 @@ namespace Tederean.FastIOW
 
     /// <summary>
     /// Write analog 16bit PWM value to given pin.
+    /// Range is from 0 to 65535.
+    /// Frequency is approximately 732 Hz.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
     /// <exception cref="ArgumentException"/>

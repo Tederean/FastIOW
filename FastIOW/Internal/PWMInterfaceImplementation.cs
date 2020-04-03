@@ -66,10 +66,23 @@ namespace Tederean.FastIOW.Internal
       this.IOWarrior = IOWarrior;
       this.PWMPins = PWMPins;
 
+      // PWM setup: Output frequency ~ 732 Hz at 16bit resolution.
       PWMWriteReport = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
       PWMWriteReport[0] = 0x20; // PWM
-      PWMWriteReport[6] = 0x00; // PWM1 Frequency 1 kHz
-      PWMWriteReport[11] = 0x00; // PWM2 Frequency 1 kHz
+
+      // Set Per1 to 65535
+      PWMWriteReport[2] = 0xFF;
+      PWMWriteReport[3] = 0xFF;
+
+      // PWM1 Master Clock 48 MHz
+      PWMWriteReport[6] = 0x03;
+
+      // Set Per2 to 65535
+      PWMWriteReport[7] = 0xFF;
+      PWMWriteReport[8] = 0xFF;
+
+      // PWM2 Master Clock 48 MHz
+      PWMWriteReport[11] = 0x03;
     }
 
 

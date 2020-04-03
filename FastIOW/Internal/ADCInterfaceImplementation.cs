@@ -96,7 +96,7 @@ namespace Tederean.FastIOW.Internal
       Enabled = false;
     }
 
-    public double AnalogRead(int pin)
+    public ushort AnalogRead(int pin)
     {
       if (!Enabled) throw new InvalidOperationException("ADC is not enabled.");
       if (!IsChannelActivated(pin)) throw new ArgumentException("Not an analog pin or just not enabled.");
@@ -117,7 +117,8 @@ namespace Tederean.FastIOW.Internal
         var lsb = result[1 + 2 * index];
         var msb = result[2 + 2 * index];
 
-        return ((msb << 8) + lsb) / 16383.0;
+        // Shift by 2 to increase resolution from 14bit to 16bit.
+        return (ushort)(((msb << 8) + lsb) << 2);
       }
 
       if (IOWarrior.Type == IOWarriorType.IOWarrior28)
@@ -125,7 +126,8 @@ namespace Tederean.FastIOW.Internal
         var lsb = result[2 + 2 * index];
         var msb = result[3 + 2 * index];
 
-        return ((msb << 8) + lsb) / 4095.0;
+        // Shift by 4 to increase resolution from 12bit to 16bit.
+        return (ushort)(((msb << 8) + lsb) << 4);
       }
 
       throw new NotImplementedException();

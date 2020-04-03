@@ -49,12 +49,12 @@ namespace Tederean.FastIOW
     void Disable();
 
     /// <summary>
-    /// Returns analog value of given pin. Value ranges from 0.0 to 1.0, equals GND to VCC.
+    /// Returns analog value of given pin. Value ranges from 0 to 65535, equals GND to VCC.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="IOException"/>
-    double AnalogRead(int pin);
+    ushort AnalogRead(int pin);
   }
 
   /// <summary>
