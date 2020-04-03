@@ -18,6 +18,8 @@
  *   MA 02110-1301 USA.
  *
  */
+using System;
+
 namespace Tederean.FastIOW
 {
 
@@ -27,33 +29,10 @@ namespace Tederean.FastIOW
   public interface TimerInterface
   {
 
-    /// <summary>
-    /// Returns true if Timer interface is enabled, otherwise false.
-    /// </summary>
-    bool Enabled { get; }
+    int PulseIn(int pin, bool value);
 
-    /// <summary>
-    /// Enable Timer interface on this IOWarrior device.
-    /// Set the channels that should be used.
-    /// </summary>
-    /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="IOException"/>
-    void Enable(TimerConfig config);
+    int PulseIn(int pin, bool value, TimeSpan timeout);
 
-    /// <summary>
-    /// Disable Timer interface on this IOWarrior device.
-    /// </summary>
-    /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="IOException"/>
-    void Disable();
-  }
-
-  /// <summary>
-  /// Represents a configuation of Timer channels.
-  /// </summary>
-  public enum TimerConfig
-  {
-    Timer_1 = 1,
-    Timer_1To2 = 2,
+    int PulseIn(int pin, bool value, TimeSpan timeout, TimeSpan interval);
   }
 }

@@ -30,6 +30,6 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns IOWarriors I2C interface.
     /// </summary>
-    I2CInterface I2CInterface { get; }
+    I2CInterface I2C { get; }
   }
 }

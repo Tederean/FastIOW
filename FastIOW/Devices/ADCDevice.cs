@@ -30,6 +30,6 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns IOWarriors ADC interface.
     /// </summary>
-    ADCInterface ADCInterface { get;  }
+    ADCInterface ADC { get;  }
   }
 }

@@ -30,6 +30,6 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns IOWarriors Timer interface.
     /// </summary>
-    TimerInterface TimerInterface { get; }
+    TimerInterface Timer { get; }
   }
 }

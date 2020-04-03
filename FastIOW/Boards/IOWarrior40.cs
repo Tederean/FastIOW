@@ -35,7 +35,7 @@ namespace Tederean.FastIOW
 
     protected override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
 
-    public I2CInterface I2CInterface { get; private set; }
+    public I2CInterface I2C { get; private set; }
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -91,7 +91,7 @@ namespace Tederean.FastIOW
 
     internal IOWarrior40(int handle) : base(handle)
     {
-      I2CInterface = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
+      I2C = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
     }
 
 

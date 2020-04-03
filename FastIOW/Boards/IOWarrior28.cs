@@ -38,9 +38,9 @@ namespace Tederean.FastIOW
 
     private int[] AnalogPins => new[] { ADC_0, ADC_1, ADC_2, ADC_3 };
 
-    public I2CInterface I2CInterface { get; private set; }
+    public I2CInterface I2C { get; private set; }
 
-    public ADCInterface ADCInterface { get; private set; }
+    public ADCInterface ADC { get; private set; }
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -102,8 +102,8 @@ namespace Tederean.FastIOW
 
     internal IOWarrior28(int handle) : base(handle)
     {
-      I2CInterface = new I2CInterfaceImplementation(this, Pipe.I2C_MODE, 62);
-      ADCInterface = new ADCInterfaceImplementation(this, Pipe.ADC_MODE, AnalogPins);
+      I2C = new I2CInterfaceImplementation(this, Pipe.I2C_MODE, 62);
+      ADC = new ADCInterfaceImplementation(this, Pipe.ADC_MODE, AnalogPins);
     }
 
 

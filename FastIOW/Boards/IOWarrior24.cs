@@ -38,9 +38,9 @@ namespace Tederean.FastIOW
 
     private int[] TimerPins => new[] { Timer_1, Timer_2 };
 
-    public I2CInterface I2CInterface { get; private set; }
+    public I2CInterface I2C { get; private set; }
 
-    public TimerInterface TimerInterface { get; private set; }
+    public TimerInterface Timer { get; private set; }
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -80,8 +80,8 @@ namespace Tederean.FastIOW
 
     internal IOWarrior24(int handle) : base(handle)
     {
-      I2CInterface = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
-      TimerInterface = new TimerInterfaceImplementation(this, TimerPins);
+      I2C = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
+      Timer = new TimerInterfaceImplementation(this, TimerPins);
     }
 
 

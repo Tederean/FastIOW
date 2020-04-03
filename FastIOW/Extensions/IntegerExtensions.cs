@@ -24,62 +24,54 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Method extension class to modify a single bit in a byte.
-  /// Just import it by using directive, enjoy additional methods for byte objects.
+  /// Method extension class to modify a single bit in a int.
+  /// Just import it by using directive, enjoy additional methods for int objects.
   /// </summary>
-  public static class ByteExtensions
+  public static class IntegerExtensions
   {
 
     private static void CheckIndex(int index)
     {
-      if (index < 0 || index > 7)
+      if (index < 0 || index > 31)
       {
-        throw new IndexOutOfRangeException("Byte index out of range. Allowed 0-7, given: " + index);
+        throw new IndexOutOfRangeException("Byte index out of range. Allowed 0-31, given: " + index);
       }
     }
 
     /// <summary>
-    /// Modify a single bit in a byte. Set a bit specified by index to true or false.
+    /// Modify a single bit in an int. Set a bit specified by index to true or false.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException"/>
-    public static void SetBit(this ref byte value, int index, bool state)
+    public static void SetBit(this ref int value, int index, bool state)
     {
       CheckIndex(index);
-
-      int targetInt = value;
 
       if (state)
       {
-        targetInt |= (1 << index); // Bitwise OR
+        value |= (1 << index); // Bitwise OR
       }
       else
       {
-        targetInt &= ~(1 << index); // Bitwise AND
+        value &= ~(1 << index); // Bitwise AND
       }
-
-      value = (byte)targetInt;
     }
 
     /// <summary>
-    /// Modify a single bit in a byte. Toggle a bit specified by index.
+    /// Modify a single bit in aa int. Toggle a bit specified by index.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException"/>
-    public static void ToggleBit(this ref byte value, int index)
+    public static void ToggleBit(this ref int value, int index)
     {
       CheckIndex(index);
 
-      int targetInt = value;
-
-      targetInt ^= (1 << index); // Bitwise Invert
-
-      value = (byte)targetInt;
+      value ^= (1 << index); // Bitwise Invert
     }
 
     /// <summary>
-    /// Returns a single bit in a byte, specified by index.
+    /// Returns a single bit in an int, specified by index.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException"/>
-    public static bool GetBit(this ref byte value, int index)
+    public static bool GetBit(this ref int value, int index)
     {
       CheckIndex(index);
 

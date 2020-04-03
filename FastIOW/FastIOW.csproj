@@ -52,6 +52,7 @@
     <Compile Include="Devices\PWMDevice.cs" />
     <Compile Include="Devices\TimerDevice.cs" />
     <Compile Include="EventArgs\PinStateChangeEventArgs.cs" />
+    <Compile Include="Extensions\IntegerExtensions.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="FastIOW.cs" />
     <Compile Include="Interfaces\PWMInterface.cs" />

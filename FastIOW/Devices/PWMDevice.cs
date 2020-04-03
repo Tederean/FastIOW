@@ -30,6 +30,6 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns IOWarriors PWM interface.
     /// </summary>
-    PWMInterface PWMInterface { get; }
+    PWMInterface PWM { get; }
   }
 }

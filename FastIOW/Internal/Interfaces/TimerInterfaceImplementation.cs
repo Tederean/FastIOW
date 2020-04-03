@@ -19,6 +19,8 @@
  *
  */
 using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Tederean.FastIOW.Internal
 {
@@ -26,13 +28,9 @@ namespace Tederean.FastIOW.Internal
   public class TimerInterfaceImplementation : TimerInterface
   {
 
-    public bool Enabled { get; private set; }
-
     private IOWarriorBase IOWarrior { get; set; }
 
     private int[] TimerPins { get; set; }
-
-    private TimerConfig SelectedChannels { get; set; }
 
 
     internal TimerInterfaceImplementation(IOWarriorBase IOWarrior, int[] TimerPins)
@@ -42,14 +40,97 @@ namespace Tederean.FastIOW.Internal
     }
 
 
-    public void Enable(TimerConfig config)
+    public int PulseIn(int pin, bool value)
     {
-      throw new NotImplementedException();
+      return PulseIn(pin, value, TimeSpan.FromSeconds(1));
     }
 
-    public void Disable()
+    public int PulseIn(int pin, bool value, TimeSpan timeout)
     {
-      throw new NotImplementedException();
+      return PulseIn(pin, value, TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(10));
+    }
+
+    public int PulseIn(int pin, bool value, TimeSpan timeout, TimeSpan interval)
+    {
+      if (!Array.Exists<int>(TimerPins, element => element == pin)) throw new ArgumentException("Not a Timer capable pin.");
+
+      SetTimerMode(PinToChannelIndex(pin) + 1); // Enable Timer
+
+      try
+      {
+        return PulseInInternal(pin, value, timeout, interval);
+      }
+      catch (TimeoutException)
+      {
+        return -1;
+      }
+      finally
+      {
+        SetTimerMode(0x00); // Disable Timer
+      }
+    }
+
+    private int PulseInInternal(int pin, bool value, TimeSpan timeout, TimeSpan interval)
+    {
+      var start = DateTime.UtcNow;
+      var id = PinToReportId(pin);
+
+      while ((DateTime.UtcNow - start) < timeout)
+      {
+        byte[] report;
+        if (IOWarrior.ReadReportNonBlocking(Pipe.SPECIAL_MODE, out report))
+        {
+          int span;
+          if (report[0] == id && (span = ReportToTimeSpan(report, value)) > -1)
+          {
+            return span;
+          }
+
+          if (report[0] != 0x29 && report[0] != 0x2A)
+          {
+            if (Debugger.IsAttached) Debugger.Break();
+
+            throw new InvalidOperationException("Recieved wrong packet!");
+          }
+        }
+
+        Thread.Sleep((int)interval.TotalMilliseconds);
+      }
+
+      throw new TimeoutException();
+    }
+
+    private int ReportToTimeSpan(byte[] report, bool value)
+    {
+      var falling = BytesToInt(report[2], report[3], report[4]);
+      var rising = BytesToInt(report[5], report[6], report[7]);
+
+      if (value && rising < falling)
+      {
+        return falling - rising;
+      }
+
+      if (!value && rising > falling)
+      {
+        return rising - falling;
+      }
+
+      return -1;
+    }
+
+    private int BytesToInt(byte b0, byte b1, byte b2)
+    {
+      return (b2 << 16) + (b1 << 8) + b0;
+    }
+
+    private void SetTimerMode(int state)
+    {
+      var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+
+      report[0] = 0x28; // Timer
+      report[1] = (byte)state; // Channels
+
+      IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
     }
 
     private int PinToChannelIndex(int pin)
@@ -57,11 +138,9 @@ namespace Tederean.FastIOW.Internal
       return Array.IndexOf<int>(TimerPins, pin);
     }
 
-    private bool IsChannelActivated(int pin)
+    private int PinToReportId(int pin)
     {
-      int index = PinToChannelIndex(pin);
-
-      return index > -1 && index < (int)SelectedChannels;
+      return PinToChannelIndex(pin) == 0 ? 0x29 : 0x2A;
     }
   }
 }
