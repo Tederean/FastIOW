@@ -43,6 +43,10 @@ namespace Tederean.FastIOW.Internal
       this.IOWarrior = IOWarrior;
       this.ADCPipe = ADCPipe;
       this.AnalogPins = AnalogPins;
+
+      // Set to a secure state.
+      Enabled = true;
+      Disable();
     }
 
 

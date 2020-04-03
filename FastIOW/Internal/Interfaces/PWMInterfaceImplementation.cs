@@ -34,10 +34,10 @@ namespace Tederean.FastIOW.Internal
 
     private byte[] PWMWriteReport { get; set; }
 
-    private PWMConfig SelectedChannels
+    internal PWMConfig SelectedChannels
     {
       get => (PWMConfig) PWMWriteReport[1];
-      set => PWMWriteReport[1] = (byte)value;
+      private set => PWMWriteReport[1] = (byte)value;
     }
 
     private ushort PWM1
@@ -83,12 +83,21 @@ namespace Tederean.FastIOW.Internal
 
       // PWM2 Master Clock 48 MHz
       PWMWriteReport[11] = 0x03;
+
+      // Set to a secure state.
+      Enabled = true;
+      Disable();
     }
 
 
     public void Enable(PWMConfig config)
     {
       if (!Enum.IsDefined(typeof(PWMConfig), config)) throw new ArgumentException("Invalid channel.");
+
+      if (config == PWMConfig.PWM_1To2 && IOWarrior is IOWarrior56 && (IOWarrior as IOWarrior56).SPI.Enabled)
+      {
+        throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
+      }
 
       SelectedChannels = config;
       PWM1 = 0;

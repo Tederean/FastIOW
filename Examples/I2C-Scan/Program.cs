@@ -27,7 +27,7 @@ namespace Button
 
       foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is I2CDevice))
       {
-        I2CInterface i2c = (iow as I2CDevice).I2CInterface;
+        I2CInterface i2c = (iow as I2CDevice).I2C;
 
         i2c.Enable();
 

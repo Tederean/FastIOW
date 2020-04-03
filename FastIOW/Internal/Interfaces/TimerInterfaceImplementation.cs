@@ -37,6 +37,9 @@ namespace Tederean.FastIOW.Internal
     {
       this.IOWarrior = IOWarrior;
       this.TimerPins = TimerPins;
+
+      // Set to a secure state.
+      SetTimerMode(0x00);
     }
 
 
@@ -53,6 +56,11 @@ namespace Tederean.FastIOW.Internal
     public int PulseIn(int pin, bool value, TimeSpan timeout, TimeSpan interval)
     {
       if (!Array.Exists<int>(TimerPins, element => element == pin)) throw new ArgumentException("Not a Timer capable pin.");
+
+      if (IOWarrior is IOWarrior24 && pin == IOWarrior24.Timer_2 && (IOWarrior as IOWarrior24).I2C.Enabled)
+      {
+        throw new InvalidOperationException("Timer_2 cannot be used while I2C is enabled.");
+      }
 
       SetTimerMode(PinToChannelIndex(pin) + 1); // Enable Timer
 
@@ -77,8 +85,7 @@ namespace Tederean.FastIOW.Internal
 
       while ((DateTime.UtcNow - start) < timeout)
       {
-        byte[] report;
-        if (IOWarrior.ReadReportNonBlocking(Pipe.SPECIAL_MODE, out report))
+        if (IOWarrior.ReadReportNonBlocking(Pipe.SPECIAL_MODE, out byte[] report))
         {
           int span;
           if (report[0] == id && (span = ReportToTimeSpan(report, value)) > -1)

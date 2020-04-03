@@ -23,7 +23,7 @@ using Tederean.FastIOW.Internal;
 namespace Tederean.FastIOW
 {
 
-  public class IOWarrior56 : IOWarriorBase, I2CDevice, ADCDevice, PWMDevice
+  public class IOWarrior56 : IOWarriorBase, I2CDevice, ADCDevice, PWMDevice, SPIDevice
   {
 
     public override string Name => "IOWarrior56";
@@ -45,6 +45,8 @@ namespace Tederean.FastIOW
     public ADCInterface ADC { get; private set; }
 
     public PWMInterface PWM { get; private set; }
+
+    public SPIInterface SPI { get; private set; }
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -153,6 +155,7 @@ namespace Tederean.FastIOW
       I2C = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 62);
       ADC = new ADCInterfaceImplementation(this, Pipe.SPECIAL_MODE, AnalogPins);
       PWM = new PWMInterfaceImplementation(this, PWMPins);
+      SPI = new SPIInterfaceImplementation(this, 61);
     }
 
 

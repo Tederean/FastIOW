@@ -43,6 +43,10 @@ namespace Tederean.FastIOW.Internal
       this.IOWarrior = IOWarrior;
       this.I2CPipe = I2CPipe;
       this.I2CPacketLength = I2CPacketLength;
+
+      // Set to a secure state.
+      Enabled = true;
+      Disable();
     }
 
 
