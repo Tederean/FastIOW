@@ -110,8 +110,9 @@ namespace Tederean.FastIOW.Internal
 
     public void AnalogWrite(int pin, ushort value)
     {
-      if (!Enabled) throw new InvalidOperationException("PWM is not enabled.");
-      if (!IsChannelActivated(pin)) throw new ArgumentException("Not an PWM pin or just not enabled.");
+      if (!Enabled) throw new InvalidOperationException("PWM interface is not enabled.");
+      if (!Array.Exists<int>(PWMPins, element => element == pin)) throw new ArgumentException("Not a PWM capable pin.");
+      if (!IsChannelActivated(pin)) throw new ArgumentException("PWM channel not enabled.");
 
       int index = PinToChannelIndex(pin);
 

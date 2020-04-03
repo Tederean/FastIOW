@@ -98,8 +98,9 @@ namespace Tederean.FastIOW.Internal
 
     public ushort AnalogRead(int pin)
     {
-      if (!Enabled) throw new InvalidOperationException("ADC is not enabled.");
-      if (!IsChannelActivated(pin)) throw new ArgumentException("Not an analog pin or just not enabled.");
+      if (!Enabled) throw new InvalidOperationException("ADC interface is not enabled.");
+      if (!Array.Exists<int>(AnalogPins, element => element == pin)) throw new ArgumentException("Not an ADC capable pin.");
+      if (!IsChannelActivated(pin)) throw new ArgumentException("ADC channel not enabled.");
 
       var result = IOWarrior.ReadReport(ADCPipe);
 

@@ -22,14 +22,38 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// A IOWarrior that offers a PWM interface.
+  /// Represents a Timer interface of an IOWarrior.
   /// </summary>
-  public interface PWMDevice
+  public interface TimerInterface
   {
 
     /// <summary>
-    /// Returns IOWarriors PWM interface.
+    /// Returns true if Timer interface is enabled, otherwise false.
     /// </summary>
-    PWMInterface PWMInterface { get; }
+    bool Enabled { get; }
+
+    /// <summary>
+    /// Enable Timer interface on this IOWarrior device.
+    /// Set the channels that should be used.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    void Enable(TimerConfig config);
+
+    /// <summary>
+    /// Disable Timer interface on this IOWarrior device.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    void Disable();
+  }
+
+  /// <summary>
+  /// Represents a configuation of Timer channels.
+  /// </summary>
+  public enum TimerConfig
+  {
+    Timer_1 = 1,
+    Timer_1To2 = 2,
   }
 }

@@ -72,7 +72,7 @@ namespace Tederean.FastIOW.Internal
 
     public void WriteBytes(byte address, params byte[] data)
     {
-      if (!Enabled) throw new InvalidOperationException("I2C is not enabled.");
+      if (!Enabled) throw new InvalidOperationException("I2C interface is not enabled.");
       if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
       if (data.Length > (I2CPacketLength - 1)) throw new ArgumentException("Data length must be between 0 and " + (I2CPacketLength - 1) + ".");
 

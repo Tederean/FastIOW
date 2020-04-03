@@ -22,14 +22,14 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// A IOWarrior that offers a PWM interface.
+  /// A IOWarrior that offers a Timer interface.
   /// </summary>
-  public interface PWMDevice
+  public interface TimerDevice
   {
 
     /// <summary>
-    /// Returns IOWarriors PWM interface.
+    /// Returns IOWarriors Timer interface.
     /// </summary>
-    PWMInterface PWMInterface { get; }
+    TimerInterface TimerInterface { get; }
   }
 }

@@ -23,7 +23,7 @@ using Tederean.FastIOW.Internal;
 namespace Tederean.FastIOW
 {
 
-  public class IOWarrior24 : IOWarriorBase, I2CDevice
+  public class IOWarrior24 : IOWarriorBase, I2CDevice, TimerDevice
   {
 
     public override string Name => "IOWarrior24";
@@ -36,7 +36,11 @@ namespace Tederean.FastIOW
 
     protected override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
 
+    private int[] TimerPins => new[] { Timer_1, Timer_2 };
+
     public I2CInterface I2CInterface { get; private set; }
+
+    public TimerInterface TimerInterface { get; private set; }
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -57,7 +61,7 @@ namespace Tederean.FastIOW
     public const int P1_6 = 2 * 8 + 6;
     public const int P1_7 = 2 * 8 + 7;
 
-    public const int IR_DATA = P0_0;
+    public const int RC5_IR = P0_0;
 
     public const int I2C_SCL = P0_1;
     public const int I2C_SDA = P0_2;
@@ -68,12 +72,16 @@ namespace Tederean.FastIOW
     public const int SPI_MISO = P0_6;
     public const int SPI_SCK = P0_7;
 
+    public const int Timer_1 = P0_0;
+    public const int Timer_2 = P0_1;
+
     public const int BUILDIN_LED = P0_3;
 
 
     internal IOWarrior24(int handle) : base(handle)
     {
       I2CInterface = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
+      TimerInterface = new TimerInterfaceImplementation(this, TimerPins);
     }
 
 

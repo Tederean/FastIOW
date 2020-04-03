@@ -59,7 +59,7 @@ namespace Tederean.FastIOW
   }
 
   /// <summary>
-  /// Represents a configuation of ADC channels.
+  /// Represents a configuation of PWM channels.
   /// </summary>
   public enum PWMConfig
   {
