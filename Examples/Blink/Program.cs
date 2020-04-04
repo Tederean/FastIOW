@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Tederean.FastIOW;
 
-namespace I2C_Scan
+namespace Blink
 {
 
   class Program

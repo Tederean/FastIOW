@@ -31,6 +31,11 @@ namespace Tederean.FastIOW
   {
 
     /// <summary>
+    /// Returns all Timer capable pins on this IOWarrior.
+    /// </summary>
+    int[] TimerPins { get; }
+
+    /// <summary>
     /// Reads a pulse on a pin in micro seconds. True for a positive pulse,
     /// false for a negative pulse. Gives up after 1 second, returning -1.
     /// Polling rate set to 10 milliseconds.

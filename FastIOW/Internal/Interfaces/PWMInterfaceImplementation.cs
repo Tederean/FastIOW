@@ -19,6 +19,7 @@
  *
  */
 using System;
+using System.Linq;
 
 namespace Tederean.FastIOW.Internal
 {
@@ -30,7 +31,12 @@ namespace Tederean.FastIOW.Internal
 
     private IOWarriorBase IOWarrior { get; set; }
 
-    private int[] PWMPins { get; set; }
+    private int[] m_PWMPins;
+    public int[] PWMPins
+    {
+      get => m_PWMPins?.ToArray() ?? default;
+      private set => m_PWMPins = value;
+    }
 
     private byte[] PWMWriteReport { get; set; }
 

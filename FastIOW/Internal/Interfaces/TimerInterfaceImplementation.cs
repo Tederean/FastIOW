@@ -20,6 +20,7 @@
  */
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace Tederean.FastIOW.Internal
@@ -30,7 +31,12 @@ namespace Tederean.FastIOW.Internal
 
     private IOWarriorBase IOWarrior { get; set; }
 
-    private int[] TimerPins { get; set; }
+    private int[] m_TimerPins;
+    public int[] TimerPins
+    {
+      get => m_TimerPins?.ToArray() ?? default;
+      private set => m_TimerPins = value;
+    }
 
     internal int TimerState { get; private set; }
 

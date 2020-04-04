@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Tederean.FastIOW;
 
-namespace I2C_Scan
+namespace Button
 {
 
   class Program

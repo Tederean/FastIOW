@@ -36,6 +36,11 @@ namespace Tederean.FastIOW
     bool Enabled { get; }
 
     /// <summary>
+    /// Returns all ADC capable pins on this IOWarrior.
+    /// </summary>
+    int[] AnalogPins { get; }
+
+    /// <summary>
     /// Enable ADC interface on this IOWarrior device.
     /// Set the channels that should be used.
     /// </summary>

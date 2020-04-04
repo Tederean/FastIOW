@@ -20,6 +20,7 @@
  */
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Tederean.FastIOW.Internal
 {
@@ -33,7 +34,12 @@ namespace Tederean.FastIOW.Internal
 
     private Pipe ADCPipe { get; set; }
 
-    private int[] AnalogPins { get; set; }
+    private int[]  m_AnalogPins;
+    public int[] AnalogPins
+    { 
+      get => m_AnalogPins?.ToArray() ?? default;
+      private set => m_AnalogPins = value;
+    }
 
     private ADCConfig SelectedChannels { get; set; }
 
