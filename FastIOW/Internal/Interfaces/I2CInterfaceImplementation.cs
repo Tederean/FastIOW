@@ -52,6 +52,11 @@ namespace Tederean.FastIOW.Internal
 
     public void Enable()
     {
+      if (IOWarrior is IOWarrior24 && ((IOWarrior as IOWarrior24).Timer as TimerInterfaceImplementation).TimerState.GetBit(1))
+      {
+        throw new InvalidOperationException("I2C cannot be used while Timer_2 is enabled.");
+      }
+
       var report = IOWarrior.NewReport(I2CPipe);
 
       report[0] = 0x01; // I2C

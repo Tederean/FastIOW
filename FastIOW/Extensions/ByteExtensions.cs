@@ -79,7 +79,7 @@ namespace Tederean.FastIOW
     /// Returns a single bit in a byte, specified by index.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException"/>
-    public static bool GetBit(this ref byte value, int index)
+    public static bool GetBit(this byte value, int index)
     {
       CheckIndex(index);
 

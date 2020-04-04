@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Tederean.FastIOW;
 
-namespace Button
+namespace I2C_Scan
 {
 
   class Program
@@ -19,12 +19,14 @@ namespace Button
     };
 
 
+    // This example will blink up LEDs with a fix frequency of 1 Hz. See above for pin definitions.
     static void Main(string[] args)
     {
       FastIOW.OpenConnection();
 
       if (!FastIOW.Connected)
       {
+        FastIOW.CloseConnection();
         Console.WriteLine("No IOWarrior detected!");
         Console.ReadKey();
         return;

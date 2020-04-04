@@ -32,6 +32,8 @@ namespace Tederean.FastIOW.Internal
 
     private int[] TimerPins { get; set; }
 
+    internal int TimerState { get; private set; }
+
 
     internal TimerInterfaceImplementation(IOWarriorBase IOWarrior, int[] TimerPins)
     {
@@ -139,6 +141,7 @@ namespace Tederean.FastIOW.Internal
       report[1] = (byte)state; // Channels
 
       IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+      TimerState = state;
     }
 
     private int PinToChannelIndex(int pin)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Tederean.FastIOW;
 
-namespace Button
+namespace I2C_Scan
 {
 
   class Program
@@ -26,13 +26,14 @@ namespace Button
       { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_0 }
     };
 
-
+    // This example lights up buildin LED as long a pushbutton is pressed. See above for pin definitions.
     static void Main(string[] args)
     {
       FastIOW.OpenConnection();
 
       if (!FastIOW.Connected)
       {
+        FastIOW.CloseConnection();
         Console.WriteLine("No IOWarrior detected!");
         Console.ReadKey();
         return;

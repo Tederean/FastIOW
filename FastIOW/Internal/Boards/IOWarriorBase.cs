@@ -63,6 +63,7 @@ namespace Tederean.FastIOW.Internal
       IOPinsReadReport = result.ToArray();
 
       IOThread = new Thread(ProcessIO);
+      IOThread.IsBackground = true;
       IOThread.Start();
     }
 

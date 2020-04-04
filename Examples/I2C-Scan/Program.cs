@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Tederean.FastIOW;
 
-namespace Button
+namespace I2C_Scan
 {
 
   class Program
@@ -17,6 +17,7 @@ namespace Button
 
       if (!FastIOW.Connected)
       {
+        FastIOW.CloseConnection();
         Console.WriteLine("No IOWarrior detected!");
         Console.ReadKey();
         return;
