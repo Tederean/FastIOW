@@ -34,6 +34,8 @@ namespace Blink
 
       PrintInfos();
 
+      Console.WriteLine("\nPress any key to exit.");
+
       IOWarrior[] iows = FastIOW.GetIOWarriors();
 
       while (!Console.KeyAvailable)
@@ -64,8 +66,6 @@ namespace Blink
       {
         Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|", iow.Name, string.Format("0x{0:X8}", iow.Id), iow.SerialNumber));
       }
-
-      Console.WriteLine("\nPress any key to exit.");
     }
   }
 }

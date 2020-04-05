@@ -52,7 +52,7 @@ namespace I2C_BH1750
 
       Iow.I2C.Enable();
       Iow.I2C.WriteBytes(BH1750_ADDRESS, BH1750_POWER_ON);
-      Iow.I2C.WriteBytes(BH1750_ADDRESS, Continuously_H_ResolutionMode);
+      Iow.I2C.WriteBytes(BH1750_ADDRESS, Continuously_H_ResolutionMode2);
 
 
       m_Chart.Dock = DockStyle.Fill;
@@ -91,11 +91,11 @@ namespace I2C_BH1750
 
       ushort rawBrightness = Iow.I2C.Read2Bytes(BH1750_ADDRESS);
 
-      double luxBrightness = ((double)rawBrightness) / 1.2;
+      double luxBrightness = ((double)rawBrightness) / 1.2 /2.0;
 
       DataLine.Values.Add(new ObservablePoint(Counter/2.0, luxBrightness));
 
-      if (Counter > 120)
+      if (Counter > 20)
       {
         DataLine.Values.RemoveAt(0);
       }
@@ -103,8 +103,14 @@ namespace I2C_BH1750
 
     private void OnFormClosingEvent(Object sender, FormClosingEventArgs e)
     {
-      Iow.I2C.WriteBytes(BH1750_ADDRESS, BH1750_POWER_DOWN);
-      Iow.I2C.Disable();
+      PollingTimer?.Stop();
+
+      if (Iow != null)
+      {
+        Iow.I2C.WriteBytes(BH1750_ADDRESS, BH1750_RESET);
+        Iow.I2C.WriteBytes(BH1750_ADDRESS, BH1750_POWER_DOWN);
+        Iow.I2C.Disable();
+      }
 
       FastIOW.CloseConnection();
     }

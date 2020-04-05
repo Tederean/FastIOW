@@ -9,6 +9,8 @@ namespace ADC_AnalogRead
   public partial class MainForm : Form
   {
 
+    private Timer PollingTimer { get; set; }
+
     // This example takes all ADC capable IOWarriors and reads in all analog inputs.
     public MainForm()
     {
@@ -40,10 +42,17 @@ namespace ADC_AnalogRead
         // Enable all ADC channels.
         (iow as ADCDevice).ADC.Enable(ADCConfig.Channel_0To7);
       }
+
+      PollingTimer = new Timer();
+      PollingTimer.Tick += new EventHandler(OnTick);
+      PollingTimer.Interval = 300;
+      PollingTimer.Start();
     }
 
     private void OnFormClosingEvent(Object sender, FormClosingEventArgs e)
     {
+      PollingTimer?.Stop();
+
       foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is ADCDevice))
       {
         // Disable all ADC channels.
@@ -53,7 +62,7 @@ namespace ADC_AnalogRead
       FastIOW.CloseConnection();
     }
 
-    private void OnScanClick(object sender, EventArgs e)
+    private void OnTick(object sender, EventArgs e)
     {
       adcListView.Items.Clear();
 

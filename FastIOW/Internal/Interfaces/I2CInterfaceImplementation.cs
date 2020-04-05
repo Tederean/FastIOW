@@ -145,11 +145,6 @@ namespace Tederean.FastIOW.Internal
       report[2] = (byte)(address << 1);
       report[2].SetBit(0, true); // true -> read
 
-      if (IOWarrior.Type == IOWarriorType.IOWarrior28)
-      {
-        report[3] = (byte)length; // Amount of bytes to read
-      }
-
       IOWarrior.WriteReport(report, I2CPipe);
 
       var result = IOWarrior.ReadReport(I2CPipe);

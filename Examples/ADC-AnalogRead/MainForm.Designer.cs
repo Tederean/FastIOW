@@ -30,49 +30,36 @@ namespace ADC_AnalogRead
         /// </summary>
         private void InitializeComponent()
         {
-            this.adcListView = new System.Windows.Forms.ListView();
-            this.button1 = new System.Windows.Forms.Button();
-            this.SuspendLayout();
-            // 
-            // adcListView
-            // 
-            this.adcListView.FullRowSelect = true;
-            this.adcListView.GridLines = true;
-            this.adcListView.HideSelection = false;
-            this.adcListView.Location = new System.Drawing.Point(50, 57);
-            this.adcListView.Name = "adcListView";
-            this.adcListView.Size = new System.Drawing.Size(695, 331);
-            this.adcListView.TabIndex = 0;
-            this.adcListView.UseCompatibleStateImageBehavior = false;
-            this.adcListView.View = System.Windows.Forms.View.Details;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(50, 438);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(695, 75);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "SCAN";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.OnScanClick);
-            // 
-            // MainForm
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 548);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.adcListView);
-            this.Name = "MainForm";
-            this.Text = "ADC-AnalogRead";
-            this.ResumeLayout(false);
+      this.adcListView = new System.Windows.Forms.ListView();
+      this.SuspendLayout();
+      // 
+      // adcListView
+      // 
+      this.adcListView.FullRowSelect = true;
+      this.adcListView.GridLines = true;
+      this.adcListView.HideSelection = false;
+      this.adcListView.Location = new System.Drawing.Point(50, 57);
+      this.adcListView.Name = "adcListView";
+      this.adcListView.Size = new System.Drawing.Size(695, 447);
+      this.adcListView.TabIndex = 0;
+      this.adcListView.UseCompatibleStateImageBehavior = false;
+      this.adcListView.View = System.Windows.Forms.View.Details;
+      // 
+      // MainForm
+      // 
+      this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.ClientSize = new System.Drawing.Size(800, 573);
+      this.Controls.Add(this.adcListView);
+      this.Name = "MainForm";
+      this.Text = "ADC-AnalogRead";
+      this.ResumeLayout(false);
 
         }
 
         #endregion
 
         private System.Windows.Forms.ListView adcListView;
-        private Button button1;
     }
 }
 

@@ -20,6 +20,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Tederean.FastIOW.Internal;
 
 namespace Tederean.FastIOW
@@ -58,32 +59,41 @@ namespace Tederean.FastIOW
 
       for (int index = 0; index < deviceCount; index++)
       {
-        int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
-        IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
-
-        if (id == IOWarriorType.IOWarrior40)
+        try
         {
-          m_IOWarriors.Add(new IOWarrior40(handle));
+          int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
+          IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
+
+          if (id == IOWarriorType.IOWarrior40)
+          {
+            m_IOWarriors.Add(new IOWarrior40(handle));
+          }
+
+          else if (id == IOWarriorType.IOWarrior24)
+          {
+            m_IOWarriors.Add(new IOWarrior24(handle));
+          }
+
+          else if (id == IOWarriorType.IOWarrior56)
+          {
+            m_IOWarriors.Add(new IOWarrior56(handle));
+          }
+
+          else if (id == IOWarriorType.IOWarrior28)
+          {
+            m_IOWarriors.Add(new IOWarrior28(handle));
+          }
+
+          else if (id == IOWarriorType.IOWarrior28L)
+          {
+            m_IOWarriors.Add(new IOWarrior28L(handle));
+          }
         }
-
-        else if (id == IOWarriorType.IOWarrior24)
+        catch (Exception ex)
         {
-          m_IOWarriors.Add(new IOWarrior24(handle));
-        }
+          var stack = ex.StackTrace;
 
-        else if (id == IOWarriorType.IOWarrior56)
-        {
-          m_IOWarriors.Add(new IOWarrior56(handle));
-        }
-
-        else if (id == IOWarriorType.IOWarrior28)
-        {
-          m_IOWarriors.Add(new IOWarrior28(handle));
-        }
-
-        else if (id == IOWarriorType.IOWarrior28L)
-        {
-          m_IOWarriors.Add(new IOWarrior28L(handle));
+          if (Debugger.IsAttached) Debugger.Break();
         }
       }
 
@@ -95,6 +105,7 @@ namespace Tederean.FastIOW
     /// </summary>
     public static void CloseConnection()
     {
+      m_IOWarriors.ForEach(entry => entry.CancelEvents());
       m_IOWarriors.ForEach(entry => entry.Disconnect());
       m_IOWarriors.Clear();
 

@@ -47,6 +47,8 @@ namespace Tederean.FastIOW.Internal
       IOWHandle = handle;
       Connected = true;
 
+      NativeLib.IowKitSetTimeout(IOWHandle, 400);
+
       StringBuilder serialNumberBuilder = new StringBuilder();
       NativeLib.IowKitGetSerialNumber(IOWHandle, serialNumberBuilder);
       SerialNumber = serialNumberBuilder.ToString();
@@ -83,13 +85,16 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
-    internal void Disconnect()
+    internal void CancelEvents()
     {
       PinStateChange?.GetInvocationList().ToList().ForEach(d => PinStateChange -= (EventHandler<PinStateChangeEventArgs>)d);
 
       Connected = false;
+    }
 
-      IOThread.Abort();
+    internal void Disconnect()
+    {
+      IOThread.Join();
       IOThread = null;
     }
 
@@ -100,6 +105,8 @@ namespace Tederean.FastIOW.Internal
         try
         {
           var result = ReadReport(Pipe.IO_PINS);
+
+          if (!Connected) return;
 
           for (int index = 1; index < result.Length; index++)
           {
