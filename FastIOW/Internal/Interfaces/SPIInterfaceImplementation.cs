@@ -70,7 +70,7 @@ namespace Tederean.FastIOW.Internal
       if (IOWarrior.Type == IOWarriorType.IOWarrior24)
       {
         // SPI Mode 0, msb first, 1MBit/sec
-        report[2] = 0x01;
+        report[2] = 0x05;
       }
 
       IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
