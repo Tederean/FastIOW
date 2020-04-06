@@ -24,7 +24,7 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Method extension class to modify a single bit in a int.
+  /// Method extension class to modify a single bit in an int.
   /// Just import it by using directive, enjoy additional methods for int objects.
   /// </summary>
   public static class IntegerExtensions
@@ -57,7 +57,7 @@ namespace Tederean.FastIOW
     }
 
     /// <summary>
-    /// Modify a single bit in aa int. Toggle a bit specified by index.
+    /// Modify a single bit in an int. Toggle a bit specified by index.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException"/>
     public static void ToggleBit(this ref int value, int index)
