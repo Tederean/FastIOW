@@ -34,7 +34,7 @@ namespace Tederean.FastIOW
     {
       if (index < 0 || index > 31)
       {
-        throw new IndexOutOfRangeException("Byte index out of range. Allowed 0-31, given: " + index);
+        throw new IndexOutOfRangeException("Integer index out of range. Allowed 0-31, given: " + index);
       }
     }
 
