@@ -13,11 +13,12 @@ namespace I2C_LiquidCrystal
 
     private LiquidCrystalI2C display;
 
-    private byte DisplayAddress = 0x27;
-    private byte DisplayColumns = 20;
-    private byte DisplayRows = 4;
+    private readonly byte DisplayAddress = 0x27;
+    private readonly byte DisplayColumns = 20;
+    private readonly byte DisplayRows = 4;
 
 
+    // This example takes the first I2C capable IOWarrior to write chars to a liquid crystal display connected via I2C adapter (pcf8574).
     public MainForm()
     {
       InitializeComponent();
