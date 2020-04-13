@@ -26,3 +26,4 @@ Experienced developers can use this library to get things fast and and with mini
 ## Limitations
 
 - This library is not thread safe, access it not simultainously with multiple threads.
+
