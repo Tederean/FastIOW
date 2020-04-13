@@ -33,7 +33,7 @@ namespace I2C_BH1750
     private long Counter { get; set; }
 
 
-    // This example an all I2C capable IOWarrior to read out an BH1750, an external brightness sensor.
+    // This example takes the first I2C capable IOWarrior to read out an BH1750, an external brightness sensor.
     public MainForm()
     {
       InitializeComponent();
