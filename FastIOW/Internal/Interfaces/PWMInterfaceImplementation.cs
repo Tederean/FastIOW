@@ -74,7 +74,7 @@ namespace Tederean.FastIOW.Internal
 
       // PWM setup: Output frequency ~ 732 Hz at 16bit resolution.
       PWMWriteReport = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
-      PWMWriteReport[0] = 0x20; // PWM
+      PWMWriteReport[0] = ReportId.PWM_SETUP;
 
       // Set Per1 to 65535
       PWMWriteReport[2] = 0xFF;

@@ -54,12 +54,12 @@ namespace Tederean.FastIOW.Internal
       SerialNumber = serialNumberBuilder.ToString();
 
       var report = NewReport(Pipe.SPECIAL_MODE);
-      report[0] = 0xFF;
+      report[0] = ReportId.GPIO_SPECIAL_READ;
 
       // Get state using special mode
       WriteReport(report, Pipe.SPECIAL_MODE);
       var result = ReadReport(Pipe.SPECIAL_MODE).Take(StandardReportSize).ToArray();
-      result[0] = 0x00;
+      result[0] = ReportId.GPIO_READ_WRITE;
 
       IOPinsWriteReport = result.ToArray();
       IOPinsReadReport = result.ToArray();
@@ -162,7 +162,6 @@ namespace Tederean.FastIOW.Internal
       if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != state)
       {
         IOPinsWriteReport[pin / 8].SetBit(pin % 8, state);
-        IOPinsWriteReport[0] = 0x00;
 
         WriteReport(IOPinsWriteReport, Pipe.IO_PINS);
       }

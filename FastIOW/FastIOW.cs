@@ -51,7 +51,14 @@ namespace Tederean.FastIOW
       if (m_DevHandle != 0x0)
         throw new InvalidOperationException("Connection already opened.");
 
-      m_DevHandle = NativeLib.IowKitOpenDevice();
+      try
+      {
+        m_DevHandle = NativeLib.IowKitOpenDevice();
+      }
+      catch (DllNotFoundException exception)
+      {
+        throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in SysWOW64 respectively System32 folder.", exception);
+      }
 
       if (m_DevHandle == 0x0) return false;
 

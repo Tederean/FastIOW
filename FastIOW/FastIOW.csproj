@@ -74,6 +74,7 @@
     <Compile Include="Internal\Boards\IOWarriorBase.cs" />
     <Compile Include="Internal\Interfaces\PWMInterfaceImplementation.cs" />
     <Compile Include="IOWarriorType.cs" />
+    <Compile Include="ReportId.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

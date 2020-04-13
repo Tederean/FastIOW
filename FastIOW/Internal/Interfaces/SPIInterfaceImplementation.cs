@@ -55,7 +55,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
 
-      report[0] = 0x08; // SPI
+      report[0] = ReportId.SPI_SETUP;
       report[1] = 0x01; // Enable
 
       if (IOWarrior.Type == IOWarriorType.IOWarrior56)
@@ -83,7 +83,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
 
-      report[0] = 0x08; // SPI
+      report[0] = ReportId.SPI_SETUP;
       report[1] = 0x00; // Disable
 
       IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
@@ -97,7 +97,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
 
-      report[0] = 0x09; // SPI Transfer
+      report[0] = ReportId.SPI_TRANSFER;
 
       if (IOWarrior.Type == IOWarriorType.IOWarrior56)
       {
@@ -130,7 +130,7 @@ namespace Tederean.FastIOW.Internal
 
       var result = IOWarrior.ReadReport(Pipe.SPECIAL_MODE);
 
-      if (result[0] != 0x09)
+      if (result[0] != ReportId.SPI_TRANSFER)
       {
         if (Debugger.IsAttached) Debugger.Break();
 

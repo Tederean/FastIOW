@@ -74,7 +74,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(ADCPipe);
 
-      report[0] = 0x1C; // ADC Setup
+      report[0] = ReportId.ADC_SETUP;
       report[1] = 0x01; // Enable
       report[2] = (byte)SelectedChannels; // Channel size
 
@@ -99,7 +99,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(ADCPipe);
 
-      report[0] = 0x1C; // ADC Setup
+      report[0] = ReportId.ADC_SETUP;
       report[1] = 0x00; // ADC Disable
 
       IOWarrior.WriteReport(report, ADCPipe);
@@ -114,7 +114,7 @@ namespace Tederean.FastIOW.Internal
 
       var result = IOWarrior.ReadReport(ADCPipe);
 
-      if (result[0] != 0x1D)
+      if (result[0] != ReportId.ADC_READ)
       {
         if (Debugger.IsAttached) Debugger.Break();
 

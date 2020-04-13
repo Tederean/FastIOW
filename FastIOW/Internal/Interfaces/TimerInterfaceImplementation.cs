@@ -101,7 +101,7 @@ namespace Tederean.FastIOW.Internal
             return span;
           }
 
-          if (report[0] != 0x29 && report[0] != 0x2A)
+          if (report[0] != ReportId.TIMER_DATA_A && report[0] != ReportId.TIMER_DATA_B)
           {
             if (Debugger.IsAttached) Debugger.Break();
 
@@ -143,7 +143,7 @@ namespace Tederean.FastIOW.Internal
     {
       var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
 
-      report[0] = 0x28; // Timer
+      report[0] = ReportId.TIMER_SETUP;
       report[1] = (byte)state; // Channels
 
       IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
@@ -157,7 +157,7 @@ namespace Tederean.FastIOW.Internal
 
     private int PinToReportId(int pin)
     {
-      return PinToChannelIndex(pin) == 0 ? 0x29 : 0x2A;
+      return PinToChannelIndex(pin) == 0 ? ReportId.TIMER_DATA_A : ReportId.TIMER_DATA_B;
     }
   }
 }

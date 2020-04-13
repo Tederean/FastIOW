@@ -59,7 +59,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(I2CPipe);
 
-      report[0] = 0x01; // I2C
+      report[0] = ReportId.I2C_SETUP;
       report[1] = 0x01; // Enable
 
       IOWarrior.WriteReport(report, I2CPipe);
@@ -72,7 +72,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(I2CPipe);
 
-      report[0] = 0x01; // I2C
+      report[0] = ReportId.I2C_SETUP;
       report[1] = 0x00; // Disable
 
       IOWarrior.WriteReport(report, I2CPipe);
@@ -87,7 +87,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(I2CPipe);
 
-      report[0] = 0x02; // I2C Write
+      report[0] = ReportId.I2C_WRITE;
 
       // Write IOW I2C settings
       report[1] = (byte)(1 + data.Length);
@@ -108,7 +108,7 @@ namespace Tederean.FastIOW.Internal
 
       var result = IOWarrior.ReadReport(I2CPipe);
 
-      if (result[0] != 0x02)
+      if (result[0] != ReportId.I2C_WRITE)
       {
         if (Debugger.IsAttached) Debugger.Break();
 
@@ -137,7 +137,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = IOWarrior.NewReport(I2CPipe);
 
-      report[0] = 0x03; // I2C Read
+      report[0] = ReportId.I2C_READ;
 
       report[1] = (byte)length; // Amount of bytes to read
 
@@ -149,7 +149,7 @@ namespace Tederean.FastIOW.Internal
 
       var result = IOWarrior.ReadReport(I2CPipe);
 
-      if (result[0] != 0x03)
+      if (result[0] != ReportId.I2C_READ)
       {
         if (Debugger.IsAttached) Debugger.Break();
 
