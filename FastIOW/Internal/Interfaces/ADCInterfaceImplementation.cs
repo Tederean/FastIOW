@@ -67,6 +67,8 @@ namespace Tederean.FastIOW.Internal
 
       if (IOWarrior.Type == IOWarriorType.IOWarrior56)
       {
+        if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("ADC interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
+
         SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To7);
       }
 

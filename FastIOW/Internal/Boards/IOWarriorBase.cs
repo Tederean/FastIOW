@@ -24,6 +24,8 @@ namespace Tederean.FastIOW.Internal
 
     public string SerialNumber { get; private set; }
 
+    public int Revision { get; private set; }
+
     public bool Connected { get; private set; }
 
     private int IOWHandle { get; set; }
@@ -52,6 +54,8 @@ namespace Tederean.FastIOW.Internal
       StringBuilder serialNumberBuilder = new StringBuilder();
       NativeLib.IowKitGetSerialNumber(IOWHandle, serialNumberBuilder);
       SerialNumber = serialNumberBuilder.ToString();
+
+      Revision = NativeLib.IowKitGetRevision(IOWHandle);
 
       var report = NewReport(Pipe.SPECIAL_MODE);
       report[0] = ReportId.GPIO_SPECIAL_READ;

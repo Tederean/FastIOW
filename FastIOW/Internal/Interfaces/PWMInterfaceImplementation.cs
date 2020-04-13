@@ -100,9 +100,16 @@ namespace Tederean.FastIOW.Internal
     {
       if (!Enum.IsDefined(typeof(PWMConfig), config)) throw new ArgumentException("Invalid channel.");
 
-      if (config == PWMConfig.PWM_1To2 && IOWarrior is IOWarrior56 && (IOWarrior as IOWarrior56).SPI.Enabled)
+      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
       {
-        throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
+        if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("PWM interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
+
+        if (config == PWMConfig.PWM_1To2)
+        {
+          if (IOWarrior.Revision < 0x2002) throw new InvalidOperationException("PWM_2 is only supported by IOWarrior firmware 2.0.0.2 or higher.");
+
+          if ((IOWarrior as IOWarrior56).SPI.Enabled) throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
+        }
       }
 
       SelectedChannels = config;

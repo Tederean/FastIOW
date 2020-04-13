@@ -65,9 +65,14 @@ namespace Tederean.FastIOW.Internal
     {
       if (!Array.Exists<int>(TimerPins, element => element == pin)) throw new ArgumentException("Not a Timer capable pin.");
 
-      if (IOWarrior is IOWarrior24 && pin == IOWarrior24.Timer_2 && (IOWarrior as IOWarrior24).I2C.Enabled)
+      if (IOWarrior.Type == IOWarriorType.IOWarrior24)
       {
-        throw new InvalidOperationException("Timer_2 cannot be used while I2C is enabled.");
+        if (IOWarrior.Revision < 0x1030) throw new InvalidOperationException("PulseIn is only supported by IOWarrior firmware 1.0.3.0 or higher.");
+
+        if (pin == IOWarrior24.Timer_2 && (IOWarrior as IOWarrior24).I2C.Enabled)
+        {
+          throw new InvalidOperationException("Timer_2 cannot be used while I2C is enabled.");
+        }
       }
 
       SetTimerMode(PinToChannelIndex(pin) + 1); // Enable Timer
