@@ -20,7 +20,7 @@ You can find some software examples [here](https://github.com/Tederean/FastIOW/t
 
 ## Installation (64-bit operating system)
 
-Download [FastIOW.dll](https://github.com/Tederean/FastIOW/releases/download/V1.0/FastIOW.dll) and [FastIOW.xml](https://github.com/Tederean/FastIOW/releases/download/V1.0/FastIOW.xml). This library requires iowkit.dll in version 1.5, that is part of the official SDK, you can download it [here](https://www.codemercs.com/downloads/iowarrior/IO-Warrior_SDK_win.zip).
+Download [FastIOW.dll](https://github.com/Tederean/FastIOW/releases/download/V1.0/FastIOW.dll) and [FastIOW.xml](https://github.com/Tederean/FastIOW/releases/download/V1.0/FastIOW.xml). This library requires iowkit.dll in version 1.5, that is part of the official SDK, you can download it [here](https://www.codemercs.com/downloads/iowarrior/IO-Warrior_SDK_win.zip) - extract the following file "/sdk/iowkit api/x64 dll/iowkit.dll".
 
 Place FastIOW.dll, FastIOW.xml and iowkit.dll in your standard library folder of your operating system. For Windows x64 this path is "C:\Windows\SysWOW64".
 
