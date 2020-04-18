@@ -17,9 +17,9 @@ namespace Tederean.FastIOW.Internal
     /// <summary>
     /// Returns id of enum.
     /// </summary>
-    public int Id { get; private set; }
+    public UInt32 Id { get; private set; }
 
-    protected Enumeration(int id, string name)
+    protected Enumeration(UInt32 id, string name)
     {
       Id = id;
       Name = name;
@@ -41,9 +41,7 @@ namespace Tederean.FastIOW.Internal
 
     public override bool Equals(object obj)
     {
-      var otherValue = obj as Enumeration;
-
-      if (otherValue == null)
+      if (!(obj is Enumeration otherValue))
         return false;
 
       var typeMatches = GetType().Equals(obj.GetType());

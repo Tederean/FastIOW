@@ -1,23 +1,24 @@
 ﻿/*
- *   
+ *
  *   Copyright 2020 Florian Porsch <tederean@gmail.com>
- *   
+ *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Lesser General Public License as published by
  *   the Free Software Foundation; either version 3 of the License, or
  *   (at your option) any later version.
- *   
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU Lesser General Public License for more details.
- *   
+ *
  *   You should have received a copy of the GNU Lesser General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  *   MA 02110-1301 USA.
  *
  */
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -37,7 +38,7 @@ namespace Tederean.FastIOW.Internal
     /// </summary>
     /// <returns>Handle für IO-Warrior oder null bei Misserfolg.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitOpenDevice();
+    public static extern IntPtr IowKitOpenDevice();
 
 
     /// <summary>
@@ -46,7 +47,7 @@ namespace Tederean.FastIOW.Internal
     /// </summary>
     /// <param name="IowHandle">Gültiges Handle zum IO-Warrior.</param>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern void IowKitCloseDevice(int IowHandle);
+    public static extern void IowKitCloseDevice(IntPtr IowHandle);
 
 
     /// <summary>
@@ -55,7 +56,7 @@ namespace Tederean.FastIOW.Internal
     /// </summary>
     /// <param name="IowHandle">Gültiges Handle zum IO-Warrior.</param>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitGetProductId(int IowHandle);
+    public static extern UInt32 IowKitGetProductId(IntPtr IowHandle);
 
 
     /// <summary>
@@ -63,7 +64,7 @@ namespace Tederean.FastIOW.Internal
     /// </summary>
     /// <returns></returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitGetNumDevs();
+    public static extern UInt32 IowKitGetNumDevs();
 
 
     /// <summary>
@@ -76,7 +77,7 @@ namespace Tederean.FastIOW.Internal
     /// <param name="numDevice">Nummer des zu öffnenden Gerätes.</param>
     /// <returns>Ein gültiges Handle für das Gerät oder 0 bei Misserfolg.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitGetDeviceHandle(int numDevice);
+    public static extern IntPtr IowKitGetDeviceHandle(UInt32 numDevice);
 
 
     /// <summary>
@@ -89,7 +90,7 @@ namespace Tederean.FastIOW.Internal
     /// <returns>Die Softwareversion des IO-Warriors oder 0, wenn kein gültiges
     /// Handle übergeben wurde.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitGetRevision(int IowHandle);
+    public static extern UInt32 IowKitGetRevision(IntPtr IowHandle);
 
 
     /// <summary>
@@ -103,7 +104,7 @@ namespace Tederean.FastIOW.Internal
     /// werden konnte. False, wenn das Handle ungültig war, der IO-Warrior keine Seriennummer
     /// hat oder das Abspeichern der Nummer im übergebenen Ziel fehlgeschlagen ist.</returns>
     [DllImport("iowkit.dll", CharSet = CharSet.Unicode)]
-    public static extern bool IowKitGetSerialNumber(int IowHandle, StringBuilder SnTarget);
+    public static extern bool IowKitGetSerialNumber(IntPtr IowHandle, StringBuilder SnTarget);
 
 
     /// <summary>
@@ -121,7 +122,7 @@ namespace Tederean.FastIOW.Internal
     /// <param name="Length">Anzahl der einzulesenden Bytes.</param>
     /// <returns>Anzahl tatsächlich eingelesener Bytes oder 0 bei Misserfolg.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitRead(int IowHandle, int numPipe, byte[] buffer, int Length);
+    public static extern UInt32 IowKitRead(IntPtr IowHandle, UInt32 numPipe, byte[] buffer, UInt32 Length);
 
 
     /// <summary>
@@ -136,7 +137,7 @@ namespace Tederean.FastIOW.Internal
     /// <param name="Length">Anzahl der einzulesenden Bytes.</param>
     /// <returns>Anzahl tatsächlich eingelesener Bytes oder 0 bei Misserfolg.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitReadNonBlocking(int IowHandle, int numPipe, byte[] buffer, int Length);
+    public static extern UInt32 IowKitReadNonBlocking(IntPtr IowHandle, UInt32 numPipe, byte[] buffer, UInt32 Length);
 
 
     /// <summary>
@@ -152,7 +153,7 @@ namespace Tederean.FastIOW.Internal
     /// <returns>True bei Erfolg, False wenn keine neuen Daten erfasst wurden oder
     /// das übergebene Handle nicht funktioniert.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern bool IowKitReadImmediate(int IowHandle, byte[] IoPinStatus);
+    public static extern bool IowKitReadImmediate(IntPtr IowHandle, byte[] IoPinStatus);
 
 
     /// <summary>
@@ -169,7 +170,7 @@ namespace Tederean.FastIOW.Internal
     /// der iowkit.dll-Beschreibung sind 1000ms oder mehr.</param>
     /// <returns>True bei Erfolg oder False bei Fehlschlag.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern bool IowKitSetTimeout(int IowHandle, int Timeout);
+    public static extern bool IowKitSetTimeout(IntPtr IowHandle, UInt32 Timeout);
 
 
     /// <summary>
@@ -183,7 +184,7 @@ namespace Tederean.FastIOW.Internal
     /// der iowkit.dll-Beschreibung sind 1000ms oder mehr.</param>
     /// <returns>True bei Erfolg oder False bei Fehlschlag.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern bool IowKitSetWriteTimeout(int IowHandle, int Timeout);
+    public static extern bool IowKitSetWriteTimeout(IntPtr IowHandle, UInt32 Timeout);
 
 
     /// <summary>
@@ -196,7 +197,7 @@ namespace Tederean.FastIOW.Internal
     /// <param name="numPipe">Nummer des Datenkanals.</param>
     /// <returns>True bei Erfolg, sonst false.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern bool IowKitCancelIo(int IowHandle, int numPipe);
+    public static extern bool IowKitCancelIo(IntPtr IowHandle, UInt32 numPipe);
 
 
     /// <summary>
@@ -212,7 +213,7 @@ namespace Tederean.FastIOW.Internal
     /// <returns>Bei erfolgreicher Durchführung ist die Anzahl geschriebener =
     /// Anazahl zu schreibender Bytes.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitWrite(int IowHandle, int numPipe, byte[] buffer, int length);
+    public static extern UInt32 IowKitWrite(IntPtr IowHandle, UInt32 numPipe, byte[] buffer, UInt32 length);
 
 
     /// <summary>
@@ -223,7 +224,7 @@ namespace Tederean.FastIOW.Internal
     /// <param name="IowHandle">Gültiges Handle zum IO-Warrior.</param>
     /// <returns>Handle für den laufenden Thread oder 0 bei Misserfolg.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern int IowKitGetThreadHandle(int IowHandle);
+    public static extern IntPtr IowKitGetThreadHandle(IntPtr IowHandle);
 
 
     /// <summary>
@@ -241,7 +242,7 @@ namespace Tederean.FastIOW.Internal
     /// <param name="legacyOpenMode">Simple oder Complex-Mode.</param>
     /// <returns>True bei Erfolg sonst false.</returns>
     [DllImport("iowkit", SetLastError = true)]
-    public static extern bool IowKitSetLegacyOpenMode(int legacyOpenMode);
+    public static extern bool IowKitSetLegacyOpenMode(UInt32 legacyOpenMode);
 
 
     /// <summary>
@@ -250,6 +251,6 @@ namespace Tederean.FastIOW.Internal
     /// </summary>
     /// <returns>Bei Fehlerfall eine Zahl ungleich 0.</returns>
     [DllImport("kernel32.dll")]
-    public static extern int GetLastError();
+    public static extern uint GetLastError();
   }
 }
