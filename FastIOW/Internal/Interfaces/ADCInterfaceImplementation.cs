@@ -58,92 +58,101 @@ namespace Tederean.FastIOW.Internal
 
     public void Enable(ADCConfig config)
     {
-      if (!Enum.IsDefined(typeof(ADCConfig), config)) throw new ArgumentException("Invalid channel.");
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+      lock (IOWarrior.SyncObject)
       {
-        SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To3);
+        if (!Enum.IsDefined(typeof(ADCConfig), config)) throw new ArgumentException("Invalid channel.");
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+        {
+          SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To3);
+        }
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        {
+          if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("ADC interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
+
+          SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To7);
+        }
+
+        Disable(); // ADC has be disabled before changing adc setup.
+
+        var report = IOWarrior.NewReport(ADCPipe);
+
+        report[0] = ReportId.ADC_SETUP;
+        report[1] = 0x01; // Enable
+        report[2] = (byte)SelectedChannels; // Channel size
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+        {
+          report[5] = 0x01; // Continuous measuring
+          report[6] = 0x04; // Sample rate of 6 kHz
+        }
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        {
+          report[3] = 0x02; // Measurement range from GND to VCC.
+        }
+
+        IOWarrior.WriteReport(report, ADCPipe);
+        Enabled = true;
       }
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
-      {
-        if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("ADC interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
-
-        SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To7);
-      }
-
-      Disable(); // ADC has be disabled before changing adc setup.
-
-      var report = IOWarrior.NewReport(ADCPipe);
-
-      report[0] = ReportId.ADC_SETUP;
-      report[1] = 0x01; // Enable
-      report[2] = (byte)SelectedChannels; // Channel size
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior28)
-      {
-        report[5] = 0x01; // Continuous measuring
-        report[6] = 0x04; // Sample rate of 6 kHz
-      }
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
-      {
-        report[3] = 0x02; // Measurement range from GND to VCC.
-      }
-
-      IOWarrior.WriteReport(report, ADCPipe);
-      Enabled = true;
     }
 
     public void Disable()
     {
-      if (!Enabled) return;
+      lock (IOWarrior.SyncObject)
+      {
+        if (!Enabled) return;
 
-      var report = IOWarrior.NewReport(ADCPipe);
+        var report = IOWarrior.NewReport(ADCPipe);
 
-      report[0] = ReportId.ADC_SETUP;
-      report[1] = 0x00; // ADC Disable
+        report[0] = ReportId.ADC_SETUP;
+        report[1] = 0x00; // ADC Disable
 
-      IOWarrior.WriteReport(report, ADCPipe);
-      Enabled = false;
+        IOWarrior.WriteReport(report, ADCPipe);
+        Enabled = false;
+      }
     }
 
     public ushort AnalogRead(int pin)
     {
-      if (!Enabled) throw new InvalidOperationException("ADC interface is not enabled.");
-      if (!Array.Exists<int>(AnalogPins, element => element == pin)) throw new ArgumentException("Not an ADC capable pin.");
-      if (!IsChannelActivated(pin)) throw new ArgumentException("ADC channel not enabled.");
-
-      var result = IOWarrior.ReadReport(ADCPipe);
-
-      if (result[0] != ReportId.ADC_READ)
+      lock (IOWarrior.SyncObject)
       {
-        if (Debugger.IsAttached) Debugger.Break();
+        if (!Enabled) throw new InvalidOperationException("ADC interface is not enabled.");
+        if (!Array.Exists<int>(AnalogPins, element => element == pin)) throw new ArgumentException("Not an ADC capable pin.");
+        if (!IsChannelActivated(pin)) throw new ArgumentException("ADC channel not enabled.");
 
-        throw new InvalidOperationException("Recieved wrong packet!");
+        var result = IOWarrior.ReadReport(ADCPipe);
+
+        if (result[0] != ReportId.ADC_READ)
+        {
+          if (Debugger.IsAttached) Debugger.Break();
+
+          throw new InvalidOperationException("Recieved wrong packet!");
+        }
+
+        int index = PinToChannelIndex(pin);
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        {
+          var lsb = result[1 + 2 * index];
+          var msb = result[2 + 2 * index];
+
+          // Shift by 2 to increase resolution from 14bit to 16bit.
+          return (ushort)(((msb << 8) + lsb) << 2);
+        }
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+        {
+          var lsb = result[2 + 2 * index];
+          var msb = result[3 + 2 * index];
+
+          // Shift by 4 to increase resolution from 12bit to 16bit.
+          return (ushort)(((msb << 8) + lsb) << 4);
+        }
+
+        throw new NotImplementedException();
       }
-
-      int index = PinToChannelIndex(pin);
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
-      {
-        var lsb = result[1 + 2 * index];
-        var msb = result[2 + 2 * index];
-
-        // Shift by 2 to increase resolution from 14bit to 16bit.
-        return (ushort)(((msb << 8) + lsb) << 2);
-      }
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior28)
-      {
-        var lsb = result[2 + 2 * index];
-        var msb = result[3 + 2 * index];
-
-        // Shift by 4 to increase resolution from 12bit to 16bit.
-        return (ushort)(((msb << 8) + lsb) << 4);
-      }
-
-      throw new NotImplementedException();
     }
 
     private int PinToChannelIndex(int pin)

@@ -10,6 +10,8 @@ namespace Tederean.FastIOW.Internal
   public abstract class IOWarriorBase : IOWarrior
   {
 
+    internal readonly object SyncObject = new object();
+
     public abstract string Name { get; }
 
     public abstract IOWarriorType Type { get; }
@@ -91,9 +93,12 @@ namespace Tederean.FastIOW.Internal
 
     internal void CancelEvents()
     {
-      PinStateChange?.GetInvocationList().ToList().ForEach(d => PinStateChange -= (EventHandler<PinStateChangeEventArgs>)d);
+      lock (SyncObject)
+      {
+        PinStateChange?.GetInvocationList().ToList().ForEach(d => PinStateChange -= (EventHandler<PinStateChangeEventArgs>)d);
 
-      Connected = false;
+        Connected = false;
+      }
     }
 
     internal void Disconnect()
@@ -122,11 +127,14 @@ namespace Tederean.FastIOW.Internal
 
               if (newState != oldState)
               {
-                IOPinsReadReport[index].SetBit(bit, newState);
-
-                if (PinStateChange != null && IsValidDigitalPin(pin))
+                lock (SyncObject)
                 {
-                  PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, newState, oldState));
+                  IOPinsReadReport[index].SetBit(bit, newState);
+
+                  if (PinStateChange != null && IsValidDigitalPin(pin))
+                  {
+                    PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, newState, oldState));
+                  }
                 }
               }
             }
@@ -144,30 +152,36 @@ namespace Tederean.FastIOW.Internal
 
     public bool DigitalRead(int pin)
     {
-      if (!IsValidDigitalPin(pin))
+      lock (SyncObject)
       {
-        throw new ArgumentNullException("Pin not existing on " + Name + ".");
+        if (!IsValidDigitalPin(pin))
+        {
+          throw new ArgumentNullException("Pin not existing on " + Name + ".");
+        }
+
+        CheckClosed();
+
+        return IOPinsReadReport[pin / 8].GetBit(pin % 8);
       }
-
-      CheckClosed();
-
-      return IOPinsReadReport[pin / 8].GetBit(pin % 8);
     }
 
     public void DigitalWrite(int pin, bool state)
     {
-      if (!IsValidDigitalPin(pin))
+      lock (SyncObject)
       {
-        throw new ArgumentNullException("Pin not existing on " + Name + ".");
-      }
+        if (!IsValidDigitalPin(pin))
+        {
+          throw new ArgumentNullException("Pin not existing on " + Name + ".");
+        }
 
-      CheckClosed();
+        CheckClosed();
 
-      if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != state)
-      {
-        IOPinsWriteReport[pin / 8].SetBit(pin % 8, state);
+        if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != state)
+        {
+          IOPinsWriteReport[pin / 8].SetBit(pin % 8, state);
 
-        WriteReport(IOPinsWriteReport, Pipe.IO_PINS);
+          WriteReport(IOPinsWriteReport, Pipe.IO_PINS);
+        }
       }
     }
 

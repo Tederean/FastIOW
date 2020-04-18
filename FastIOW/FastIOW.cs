@@ -32,6 +32,8 @@ namespace Tederean.FastIOW
   public static class FastIOW
   {
 
+    private static readonly object SyncObject = new object();
+
     private static int m_DevHandle;
 
     private static readonly List<IOWarriorBase> m_IOWarriors = new List<IOWarriorBase>();
@@ -48,63 +50,66 @@ namespace Tederean.FastIOW
     /// <exception cref="InvalidOperationException"/>
     public static bool OpenConnection()
     {
-      if (m_DevHandle != 0x0)
-        throw new InvalidOperationException("Connection already opened.");
-
-      try
+      lock (SyncObject)
       {
-        m_DevHandle = NativeLib.IowKitOpenDevice();
-      }
-      catch (DllNotFoundException exception)
-      {
-        throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in SysWOW64 respectively System32 folder.", exception);
-      }
+        if (m_DevHandle != 0x0)
+          throw new InvalidOperationException("Connection already opened.");
 
-      if (m_DevHandle == 0x0) return false;
-
-      int deviceCount = NativeLib.IowKitGetNumDevs();
-
-      for (int index = 0; index < deviceCount; index++)
-      {
         try
         {
-          int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
-          IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
-
-          if (id == IOWarriorType.IOWarrior40)
-          {
-            m_IOWarriors.Add(new IOWarrior40(handle));
-          }
-
-          else if (id == IOWarriorType.IOWarrior24)
-          {
-            m_IOWarriors.Add(new IOWarrior24(handle));
-          }
-
-          else if (id == IOWarriorType.IOWarrior56)
-          {
-            m_IOWarriors.Add(new IOWarrior56(handle));
-          }
-
-          else if (id == IOWarriorType.IOWarrior28)
-          {
-            m_IOWarriors.Add(new IOWarrior28(handle));
-          }
-
-          else if (id == IOWarriorType.IOWarrior28L)
-          {
-            m_IOWarriors.Add(new IOWarrior28L(handle));
-          }
+          m_DevHandle = NativeLib.IowKitOpenDevice();
         }
-        catch (Exception ex)
+        catch (DllNotFoundException exception)
         {
-          var stack = ex.StackTrace;
-
-          if (Debugger.IsAttached) Debugger.Break();
+          throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in SysWOW64 respectively System32 folder.", exception);
         }
-      }
 
-      return true;
+        if (m_DevHandle == 0x0) return false;
+
+        int deviceCount = NativeLib.IowKitGetNumDevs();
+
+        for (int index = 0; index < deviceCount; index++)
+        {
+          try
+          {
+            int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
+            IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
+
+            if (id == IOWarriorType.IOWarrior40)
+            {
+              m_IOWarriors.Add(new IOWarrior40(handle));
+            }
+
+            else if (id == IOWarriorType.IOWarrior24)
+            {
+              m_IOWarriors.Add(new IOWarrior24(handle));
+            }
+
+            else if (id == IOWarriorType.IOWarrior56)
+            {
+              m_IOWarriors.Add(new IOWarrior56(handle));
+            }
+
+            else if (id == IOWarriorType.IOWarrior28)
+            {
+              m_IOWarriors.Add(new IOWarrior28(handle));
+            }
+
+            else if (id == IOWarriorType.IOWarrior28L)
+            {
+              m_IOWarriors.Add(new IOWarrior28L(handle));
+            }
+          }
+          catch (Exception ex)
+          {
+            var stack = ex.StackTrace;
+
+            if (Debugger.IsAttached) Debugger.Break();
+          }
+        }
+
+        return true;
+      }
     }
 
     /// <summary>
@@ -112,14 +117,17 @@ namespace Tederean.FastIOW
     /// </summary>
     public static void CloseConnection()
     {
-      m_IOWarriors.ForEach(entry => entry.CancelEvents());
-      m_IOWarriors.ForEach(entry => entry.Disconnect());
-      m_IOWarriors.Clear();
-
-      if (m_DevHandle != 0x0)
+      lock (SyncObject)
       {
-        NativeLib.IowKitCloseDevice(m_DevHandle);
-        m_DevHandle = 0x0;
+        m_IOWarriors.ForEach(entry => entry.CancelEvents());
+        m_IOWarriors.ForEach(entry => entry.Disconnect());
+        m_IOWarriors.Clear();
+
+        if (m_DevHandle != 0x0)
+        {
+          NativeLib.IowKitCloseDevice(m_DevHandle);
+          m_DevHandle = 0x0;
+        }
       }
     }
 
@@ -128,7 +136,10 @@ namespace Tederean.FastIOW
     /// </summary>
     public static IOWarrior[] GetIOWarriors()
     {
-      return m_IOWarriors.ToArray();
+      lock (SyncObject)
+      {
+        return m_IOWarriors.ToArray();
+      }
     }
   }
 }

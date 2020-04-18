@@ -48,96 +48,105 @@ namespace Tederean.FastIOW.Internal
 
     public void Enable()
     {
-      if (IOWarrior is IOWarrior56 && ((IOWarrior as IOWarrior56).PWM as PWMInterfaceImplementation).SelectedChannels == PWMConfig.PWM_1To2)
+      lock (IOWarrior.SyncObject)
       {
-        throw new InvalidOperationException("SPI cannot be used while PWM_2 is enabled.");
+        if (IOWarrior is IOWarrior56 && ((IOWarrior as IOWarrior56).PWM as PWMInterfaceImplementation).SelectedChannels == PWMConfig.PWM_1To2)
+        {
+          throw new InvalidOperationException("SPI cannot be used while PWM_2 is enabled.");
+        }
+
+        var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+
+        report[0] = ReportId.SPI_SETUP;
+        report[1] = 0x01; // Enable
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        {
+          // SPI Mode 0, msb first
+          report[2] = 0x00;
+
+          // Clock -> 8 MHz
+          report[3] = 0x02;
+        }
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior24)
+        {
+          // SPI Mode 0, msb first, 1MBit/sec
+          report[2] = 0x05;
+        }
+
+        IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+        Enabled = true;
       }
-
-      var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
-
-      report[0] = ReportId.SPI_SETUP;
-      report[1] = 0x01; // Enable
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
-      {
-        // SPI Mode 0, msb first
-        report[2] = 0x00;
-
-        // Clock -> 8 MHz
-        report[3] = 0x02;
-      }
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior24)
-      {
-        // SPI Mode 0, msb first, 1MBit/sec
-        report[2] = 0x05;
-      }
-
-      IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
-      Enabled = true;
     }
 
     public void Disable()
     {
-      if (!Enabled) return;
+      lock (IOWarrior.SyncObject)
+      {
+        if (!Enabled) return;
 
-      var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+        var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
 
-      report[0] = ReportId.SPI_SETUP;
-      report[1] = 0x00; // Disable
+        report[0] = ReportId.SPI_SETUP;
+        report[1] = 0x00; // Disable
 
-      IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
-      Enabled = false;
+        IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+        Enabled = false;
+      }
     }
 
     public byte[] TransferBytes(params byte[] data)
     {
-      if (!Enabled) throw new InvalidOperationException("SPI interface is not enabled.");
-      if (data.Length < 1 || data.Length > SPIPacketLength) throw new ArgumentException("Data length must be between 1 and " + SPIPacketLength + ".");
-
-      var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
-
-      report[0] = ReportId.SPI_TRANSFER;
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+      lock (IOWarrior.SyncObject)
       {
-        // Count
-        report[1] = (byte)data.Length;
+        if (!Enabled) throw new InvalidOperationException("SPI interface is not enabled.");
+        if (data.Length < 1 || data.Length > SPIPacketLength) throw new ArgumentException("Data length must be between 1 and " + SPIPacketLength + ".");
 
-        // Flags -> no DRDY, SS stays not acive
-        report[2] = 0x00;
+        var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
 
-        // Write data bytes
-        for (int index = 0; index < data.Length; index++)
+        report[0] = ReportId.SPI_TRANSFER;
+
+        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
         {
-          report[3 + index] = data[index];
+          // Count
+          report[1] = (byte)data.Length;
+
+          // Flags -> no DRDY, SS stays not acive
+          report[2] = 0x00;
+
+          // Write data bytes
+          for (int index = 0; index < data.Length; index++)
+          {
+            report[3 + index] = data[index];
+          }
         }
-      }
 
-      if (IOWarrior.Type == IOWarriorType.IOWarrior24)
-      {
-        // Count & Flags -> no DRDY, SS stays not acive
-        report[1] = (byte)data.Length;
-
-        // Write data bytes
-        for (int index = 0; index < data.Length; index++)
+        if (IOWarrior.Type == IOWarriorType.IOWarrior24)
         {
-          report[2 + index] = data[index];
+          // Count & Flags -> no DRDY, SS stays not acive
+          report[1] = (byte)data.Length;
+
+          // Write data bytes
+          for (int index = 0; index < data.Length; index++)
+          {
+            report[2 + index] = data[index];
+          }
         }
+
+        IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+
+        var result = IOWarrior.ReadReport(Pipe.SPECIAL_MODE);
+
+        if (result[0] != ReportId.SPI_TRANSFER)
+        {
+          if (Debugger.IsAttached) Debugger.Break();
+
+          throw new InvalidOperationException("Recieved wrong packet!");
+        }
+
+        return result.Skip(2).Take(result[1]).ToArray();
       }
-
-      IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
-
-      var result = IOWarrior.ReadReport(Pipe.SPECIAL_MODE);
-
-      if (result[0] != ReportId.SPI_TRANSFER)
-      {
-        if (Debugger.IsAttached) Debugger.Break();
-
-        throw new InvalidOperationException("Recieved wrong packet!");
-      }
-
-      return result.Skip(2).Take(result[1]).ToArray();
     }
   }
 }

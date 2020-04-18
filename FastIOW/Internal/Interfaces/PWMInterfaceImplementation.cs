@@ -98,50 +98,59 @@ namespace Tederean.FastIOW.Internal
 
     public void Enable(PWMConfig config)
     {
-      if (!Enum.IsDefined(typeof(PWMConfig), config)) throw new ArgumentException("Invalid channel.");
-
-      if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+      lock (IOWarrior.SyncObject)
       {
-        if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("PWM interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
+        if (!Enum.IsDefined(typeof(PWMConfig), config)) throw new ArgumentException("Invalid channel.");
 
-        if (config == PWMConfig.PWM_1To2)
+        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
         {
-          if (IOWarrior.Revision < 0x2002) throw new InvalidOperationException("PWM_2 is only supported by IOWarrior firmware 2.0.0.2 or higher.");
+          if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("PWM interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
 
-          if ((IOWarrior as IOWarrior56).SPI.Enabled) throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
+          if (config == PWMConfig.PWM_1To2)
+          {
+            if (IOWarrior.Revision < 0x2002) throw new InvalidOperationException("PWM_2 is only supported by IOWarrior firmware 2.0.0.2 or higher.");
+
+            if ((IOWarrior as IOWarrior56).SPI.Enabled) throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
+          }
         }
+
+        SelectedChannels = config;
+        PWM1 = 0;
+        PWM2 = 0;
+
+        IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+        Enabled = true;
       }
-
-      SelectedChannels = config;
-      PWM1 = 0;
-      PWM2 = 0;
-
-      IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
-      Enabled = true;
     }
 
     public void Disable()
     {
-      if (!Enabled) return;
+      lock (IOWarrior.SyncObject)
+      {
+        if (!Enabled) return;
 
-      SelectedChannels = 0x00; // Disable
+        SelectedChannels = 0x00; // Disable
 
-      IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
-      Enabled = false;
+        IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+        Enabled = false;
+      }
     }
 
     public void AnalogWrite(int pin, ushort value)
     {
-      if (!Enabled) throw new InvalidOperationException("PWM interface is not enabled.");
-      if (!Array.Exists<int>(PWMPins, element => element == pin)) throw new ArgumentException("Not a PWM capable pin.");
-      if (!IsChannelActivated(pin)) throw new ArgumentException("PWM channel not enabled.");
+      lock (IOWarrior.SyncObject)
+      {
+        if (!Enabled) throw new InvalidOperationException("PWM interface is not enabled.");
+        if (!Array.Exists<int>(PWMPins, element => element == pin)) throw new ArgumentException("Not a PWM capable pin.");
+        if (!IsChannelActivated(pin)) throw new ArgumentException("PWM channel not enabled.");
 
-      int index = PinToChannelIndex(pin);
+        int index = PinToChannelIndex(pin);
 
-      if (index == 0) PWM1 = value;
-      if (index == 1) PWM2 = value;
+        if (index == 0) PWM1 = value;
+        if (index == 1) PWM2 = value;
 
-      IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+        IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+      }
     }
 
     private int PinToChannelIndex(int pin)
