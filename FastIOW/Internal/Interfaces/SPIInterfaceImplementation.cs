@@ -112,7 +112,7 @@ namespace Tederean.FastIOW.Internal
           // Count
           report[1] = (byte)data.Length;
 
-          // Flags -> no DRDY, SS stays not acive
+          // Flags -> no DRDY, SS stays not active
           report[2] = 0x00;
 
           // Write data bytes
