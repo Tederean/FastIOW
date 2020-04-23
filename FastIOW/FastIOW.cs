@@ -21,6 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Tederean.FastIOW.Internal;
 
 namespace Tederean.FastIOW
@@ -58,57 +61,75 @@ namespace Tederean.FastIOW
         try
         {
           m_DevHandle = NativeLib.IowKitOpenDevice();
-        }
-        catch (DllNotFoundException exception)
-        {
-          throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in SysWOW64 respectively System32 folder.", exception);
-        }
 
-        if (m_DevHandle == 0x0) return false;
+          if (m_DevHandle == 0x0) return false;
 
-        int deviceCount = NativeLib.IowKitGetNumDevs();
+          int deviceCount = NativeLib.IowKitGetNumDevs();
 
-        for (int index = 0; index < deviceCount; index++)
-        {
-          try
+          for (int index = 0; index < deviceCount; index++)
           {
-            int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
-            IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
-
-            if (id == IOWarriorType.IOWarrior40)
-            {
-              m_IOWarriors.Add(new IOWarrior40(handle));
-            }
-
-            else if (id == IOWarriorType.IOWarrior24)
-            {
-              m_IOWarriors.Add(new IOWarrior24(handle));
-            }
-
-            else if (id == IOWarriorType.IOWarrior56)
-            {
-              m_IOWarriors.Add(new IOWarrior56(handle));
-            }
-
-            else if (id == IOWarriorType.IOWarrior28)
-            {
-              m_IOWarriors.Add(new IOWarrior28(handle));
-            }
-
-            else if (id == IOWarriorType.IOWarrior28L)
-            {
-              m_IOWarriors.Add(new IOWarrior28L(handle));
-            }
+            TryInitDevice(index);
           }
-          catch (Exception ex)
-          {
-            var stack = ex.StackTrace;
+        }
+        catch (Exception ex)
+        {
+          ThrowInternalException(ex);
+        }
 
-            if (Debugger.IsAttached) Debugger.Break();
-          }
+        return m_IOWarriors.Count > 0;
+      }
+    }
+
+    private static void TryInitDevice(int index)
+    {
+      for (int counter = 0; counter < 3; counter++)
+      {
+        if (InitDevice(index)) return;
+
+        Thread.Sleep(10);
+      }
+
+      // Error initializing an IOWarrior!
+      if (Debugger.IsAttached) Debugger.Break();
+    }
+
+    private static bool InitDevice(int index)
+    {
+      try
+      {
+        int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
+        IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
+
+        if (id == IOWarriorType.IOWarrior40)
+        {
+          m_IOWarriors.Add(new IOWarrior40(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior24)
+        {
+          m_IOWarriors.Add(new IOWarrior24(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior56)
+        {
+          m_IOWarriors.Add(new IOWarrior56(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior28)
+        {
+          m_IOWarriors.Add(new IOWarrior28(handle));
+        }
+
+        else if (id == IOWarriorType.IOWarrior28L)
+        {
+          m_IOWarriors.Add(new IOWarrior28L(handle));
         }
 
         return true;
+      }
+      catch (IOException)
+      {
+        return false;
       }
     }
 
@@ -125,10 +146,35 @@ namespace Tederean.FastIOW
 
         if (m_DevHandle != 0x0)
         {
-          NativeLib.IowKitCloseDevice(m_DevHandle);
-          m_DevHandle = 0x0;
+          try
+          {
+            NativeLib.IowKitCloseDevice(m_DevHandle);
+          }
+          catch (Exception ex)
+          {
+            ThrowInternalException(ex);
+          }
+          finally
+          {
+            m_DevHandle = 0x0;
+          }
         }
       }
+    }
+
+    private static void ThrowInternalException(Exception ex)
+    {
+      if (ex is DllNotFoundException)
+      {
+        throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in SysWOW64 respectively System32 folder.", ex);
+      }
+
+      else if (ex is SEHException || ex is AccessViolationException)
+      {
+        throw new InvalidOperationException("iowkit.dll caused segmentation fault! Try to reinsert your IOWarrior USB devices or reboot your system.", ex);
+      }
+
+      else throw ex;
     }
 
     /// <summary>
