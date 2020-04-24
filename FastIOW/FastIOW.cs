@@ -166,7 +166,7 @@ namespace Tederean.FastIOW
     {
       if (ex is DllNotFoundException)
       {
-        throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in SysWOW64 respectively System32 folder.", ex);
+        throw new InvalidOperationException("Cannot find iowkit.dll file! Ensure that it is located next to your application or in System32 folder.", ex);
       }
 
       else if (ex is SEHException || ex is AccessViolationException)
