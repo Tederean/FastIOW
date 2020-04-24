@@ -26,11 +26,11 @@ namespace Tederean.FastIOW.Internal
 
     public string SerialNumber { get; private set; }
 
-    public int Revision { get; private set; }
+    public uint Revision { get; private set; }
 
     public bool Connected { get; private set; }
 
-    private int IOWHandle { get; set; }
+    private IntPtr IOWHandle { get; set; }
 
     private byte[] IOPinsWriteReport { get; set; }
 
@@ -46,7 +46,7 @@ namespace Tederean.FastIOW.Internal
     public event EventHandler<PinStateChangeEventArgs> PinStateChange;
 
 
-    internal IOWarriorBase(int handle)
+    internal IOWarriorBase(IntPtr handle)
     {
       IOWHandle = handle;
       Connected = true;
@@ -70,8 +70,7 @@ namespace Tederean.FastIOW.Internal
       IOPinsWriteReport = result.ToArray();
       IOPinsReadReport = result.ToArray();
 
-      IOThread = new Thread(ProcessIO);
-      IOThread.IsBackground = true;
+      IOThread = new Thread(ProcessIO) { IsBackground = true };
       IOThread.Start();
     }
 
@@ -204,7 +203,7 @@ namespace Tederean.FastIOW.Internal
 
       var report = NewReport(pipe);
 
-      if (report.Length != NativeLib.IowKitRead(IOWHandle, pipe.Id, report, report.Length))
+      if (report.Length != NativeLib.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length))
       {
         throw new IOException("Error while reading data.");
       }
@@ -219,7 +218,7 @@ namespace Tederean.FastIOW.Internal
 
       report = NewReport(pipe);
 
-      return report.Length == NativeLib.IowKitReadNonBlocking(IOWHandle, pipe.Id, report, report.Length);
+      return report.Length == NativeLib.IowKitReadNonBlocking(IOWHandle, pipe.Id, report, (uint)report.Length);
     }
 
     public void WriteReport(byte[] report, Pipe pipe)
@@ -227,7 +226,7 @@ namespace Tederean.FastIOW.Internal
       CheckClosed();
       CheckPipe(pipe);
 
-      if (report.Length != NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, report.Length))
+      if (report.Length != NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length))
       {
         throw new IOException("Error while writing data.");
       }

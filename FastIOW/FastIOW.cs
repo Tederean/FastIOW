@@ -1,17 +1,17 @@
 ﻿/*
- *   
+ *
  *   Copyright 2020 Florian Porsch <tederean@gmail.com>
- *   
+ *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Lesser General Public License as published by
  *   the Free Software Foundation; either version 3 of the License, or
  *   (at your option) any later version.
- *   
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU Lesser General Public License for more details.
- *   
+ *
  *   You should have received a copy of the GNU Lesser General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -37,14 +37,14 @@ namespace Tederean.FastIOW
 
     private static readonly object SyncObject = new object();
 
-    private static int m_DevHandle;
+    private static IntPtr m_DevHandle;
 
     private static readonly List<IOWarriorBase> m_IOWarriors = new List<IOWarriorBase>();
 
     /// <summary>
     /// Returns true if connected to at least one IOWarrior, otherwise false.
     /// </summary>
-    public static bool Connected => m_DevHandle != 0x0;
+    public static bool Connected => m_DevHandle != IntPtr.Zero;
 
     /// <summary>
     /// Connect to all available IOWarriors. Returns true if
@@ -55,18 +55,18 @@ namespace Tederean.FastIOW
     {
       lock (SyncObject)
       {
-        if (m_DevHandle != 0x0)
+        if (m_DevHandle != IntPtr.Zero)
           throw new InvalidOperationException("Connection already opened.");
 
         try
         {
           m_DevHandle = NativeLib.IowKitOpenDevice();
 
-          if (m_DevHandle == 0x0) return false;
+          if (m_DevHandle == IntPtr.Zero) return false;
 
-          int deviceCount = NativeLib.IowKitGetNumDevs();
+          uint deviceCount = NativeLib.IowKitGetNumDevs();
 
-          for (int index = 0; index < deviceCount; index++)
+          for (uint index = 0; index < deviceCount; index++)
           {
             TryInitDevice(index);
           }
@@ -80,7 +80,7 @@ namespace Tederean.FastIOW
       }
     }
 
-    private static void TryInitDevice(int index)
+    private static void TryInitDevice(uint index)
     {
       for (int counter = 0; counter < 3; counter++)
       {
@@ -93,11 +93,11 @@ namespace Tederean.FastIOW
       if (Debugger.IsAttached) Debugger.Break();
     }
 
-    private static bool InitDevice(int index)
+    private static bool InitDevice(uint index)
     {
       try
       {
-        int handle = NativeLib.IowKitGetDeviceHandle(index + 1);
+        IntPtr handle = NativeLib.IowKitGetDeviceHandle(index + 1);
         IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
 
         if (id == IOWarriorType.IOWarrior40)
@@ -144,7 +144,7 @@ namespace Tederean.FastIOW
         m_IOWarriors.ForEach(entry => entry.Disconnect());
         m_IOWarriors.Clear();
 
-        if (m_DevHandle != 0x0)
+        if (m_DevHandle != IntPtr.Zero)
         {
           try
           {
@@ -156,7 +156,7 @@ namespace Tederean.FastIOW
           }
           finally
           {
-            m_DevHandle = 0x0;
+            m_DevHandle = IntPtr.Zero;
           }
         }
       }
