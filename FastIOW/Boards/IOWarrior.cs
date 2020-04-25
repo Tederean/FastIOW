@@ -107,6 +107,8 @@ namespace Tederean.FastIOW
 
     /// <summary>
     /// Returns byte array report read from IOWarrior device using given pipe.
+    /// This method blocks until new data arrived from IOWarrior or timeout
+    /// of 400ms expired, which results in an IOException.
     /// Use this method only if you know what you are doing.
     /// </summary>
     /// <exception cref="ArgumentNullException"/>
@@ -116,14 +118,24 @@ namespace Tederean.FastIOW
     byte[] ReadReport(Pipe pipe);
 
     /// <summary>
-    /// Read byte array report from IOWarrior device using given pipe.
+    /// Try to read byte array report from IOWarrior device using given pipe.
+    /// This method blocks until new data arrived from IOWarrior or timeout of 400ms expired.
     /// Returns true if report contains new data, otherwise false.
     /// Use this method only if you know what you are doing.
     /// </summary>
     /// <exception cref="ArgumentNullException"/>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="IOException"/>
-    bool ReadReportNonBlocking(Pipe pipe, out byte[] report);
+    bool TryReadReport(Pipe pipe, out byte[] report);
+
+    /// <summary>
+    /// Read byte array report from IOWarrior device using given pipe.
+    /// This method returns immediately - true if report contains new data, otherwise false.
+    /// Use this method only if you know what you are doing.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    bool TryReadReportNonBlocking(Pipe pipe, out byte[] report);
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -112,9 +113,13 @@ namespace Tederean.FastIOW.Internal
       {
         try
         {
-          var result = ReadReport(Pipe.IO_PINS);
+          var result = NewReport(Pipe.IO_PINS);
 
-          if (!Connected) return;
+          if (result.Length != NativeLib.IowKitRead(IOWHandle, Pipe.IO_PINS.Id, result, (uint)result.Length))
+            continue;
+
+          if (!Connected)
+            return;
 
           for (int index = 1; index < result.Length; index++)
           {
@@ -139,7 +144,12 @@ namespace Tederean.FastIOW.Internal
             }
           }
         }
-        catch (Exception) { }
+        catch (Exception ex)
+        {
+          var stack = ex.StackTrace;
+
+          if (Debugger.IsAttached) Debugger.Break();
+        }
       }
     }
 
@@ -147,6 +157,14 @@ namespace Tederean.FastIOW.Internal
     {
       if (!Connected)
         throw new InvalidOperationException(Name + " (ID: " + string.Format("0x{0:X8}", Id) + " SN: " + SerialNumber + ") is already closed.");
+    }
+
+    private int ReportSize(Pipe pipe)
+    {
+      if (pipe == Pipe.IO_PINS)
+        return StandardReportSize;
+
+      return SpecialReportSize;
     }
 
     public bool DigitalRead(int pin)
@@ -188,47 +206,66 @@ namespace Tederean.FastIOW.Internal
     {
       CheckPipe(pipe);
 
-      if (pipe == Pipe.IO_PINS)
-      {
-        return Enumerable.Repeat((byte)0x0, StandardReportSize).ToArray();
-      }
-
-      return Enumerable.Repeat((byte)0x0, SpecialReportSize).ToArray();
+      return Enumerable.Repeat((byte)0x0, ReportSize(pipe)).ToArray();
     }
 
     public byte[] ReadReport(Pipe pipe)
     {
-      CheckClosed();
-      CheckPipe(pipe);
-
-      var report = NewReport(pipe);
-
-      if (report.Length != NativeLib.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length))
+      lock (SyncObject)
       {
-        throw new IOException("Error while reading data.");
-      }
+        CheckClosed();
+        CheckPipe(pipe);
 
-      return report;
+        var report = NewReport(pipe);
+
+        if (report.Length != NativeLib.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length))
+        {
+          throw new IOException("Error while reading data.");
+        }
+
+        return report;
+      }
     }
 
-    public bool ReadReportNonBlocking(Pipe pipe, out byte[] report)
+    public bool TryReadReport(Pipe pipe, out byte[] report)
     {
-      CheckClosed();
-      CheckPipe(pipe);
+      lock (SyncObject)
+      {
+        CheckClosed();
+        CheckPipe(pipe);
 
-      report = NewReport(pipe);
+        report = NewReport(pipe);
 
-      return report.Length == NativeLib.IowKitReadNonBlocking(IOWHandle, pipe.Id, report, (uint)report.Length);
+        return report.Length == NativeLib.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length);
+      }
+    }
+
+    public bool TryReadReportNonBlocking(Pipe pipe, out byte[] report)
+    {
+      lock (SyncObject)
+      {
+        CheckClosed();
+        CheckPipe(pipe);
+
+        report = NewReport(pipe);
+
+        return report.Length == NativeLib.IowKitReadNonBlocking(IOWHandle, pipe.Id, report, (uint)report.Length);
+      }
     }
 
     public void WriteReport(byte[] report, Pipe pipe)
     {
-      CheckClosed();
-      CheckPipe(pipe);
-
-      if (report.Length != NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length))
+      lock (SyncObject)
       {
-        throw new IOException("Error while writing data.");
+        CheckClosed();
+        CheckPipe(pipe);
+
+        if (ReportSize(pipe) != report.Length) throw new ArgumentException("Wrong report size!");
+
+        if (report.Length != NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length))
+        {
+          throw new IOException("Error while writing data.");
+        }
       }
     }
   }

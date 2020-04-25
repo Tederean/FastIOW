@@ -101,7 +101,7 @@ namespace Tederean.FastIOW.Internal
 
       while ((DateTime.UtcNow - start) < timeout)
       {
-        if (IOWarrior.ReadReportNonBlocking(Pipe.SPECIAL_MODE, out byte[] report))
+        if (IOWarrior.TryReadReportNonBlocking(Pipe.SPECIAL_MODE, out byte[] report))
         {
           int span;
           if (report[0] == id && (span = ReportToTimeSpan(report, value)) > -1)
