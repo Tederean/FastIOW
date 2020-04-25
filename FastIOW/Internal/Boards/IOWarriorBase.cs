@@ -111,44 +111,42 @@ namespace Tederean.FastIOW.Internal
     {
       while (Connected)
       {
-        try
+        var result = NewReport(Pipe.IO_PINS);
+
+        if (result.Length != NativeLib.IowKitRead(IOWHandle, Pipe.IO_PINS.Id, result, (uint)result.Length))
+          continue;
+
+        if (!Connected)
+          return;
+
+        for (int index = 1; index < result.Length; index++)
         {
-          var result = NewReport(Pipe.IO_PINS);
-
-          if (result.Length != NativeLib.IowKitRead(IOWHandle, Pipe.IO_PINS.Id, result, (uint)result.Length))
-            continue;
-
-          if (!Connected)
-            return;
-
-          for (int index = 1; index < result.Length; index++)
+          foreach (var bit in Enumerable.Range(0, 7))
           {
-            foreach (var bit in Enumerable.Range(0, 7))
+            bool newState = result[index].GetBit(bit);
+            bool oldState = IOPinsReadReport[index].GetBit(bit);
+            int pin = index * 8 + bit;
+
+            if (newState != oldState)
             {
-              bool newState = result[index].GetBit(bit);
-              bool oldState = IOPinsReadReport[index].GetBit(bit);
-              int pin = index * 8 + bit;
-
-              if (newState != oldState)
+              lock (SyncObject)
               {
-                lock (SyncObject)
-                {
-                  IOPinsReadReport[index].SetBit(bit, newState);
+                IOPinsReadReport[index].SetBit(bit, newState);
 
-                  if (PinStateChange != null && IsValidDigitalPin(pin))
+                if (PinStateChange != null && IsValidDigitalPin(pin))
+                {
+                  try
                   {
                     PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, newState, oldState));
+                  }
+                  catch (Exception)
+                  {
+                    if (Debugger.IsAttached) Debugger.Break();
                   }
                 }
               }
             }
           }
-        }
-        catch (Exception ex)
-        {
-          var stack = ex.StackTrace;
-
-          if (Debugger.IsAttached) Debugger.Break();
         }
       }
     }
