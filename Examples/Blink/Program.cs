@@ -38,6 +38,10 @@ namespace Blink
 
       IOWarrior[] iows = FastIOW.GetIOWarriors();
 
+      // Set delay to zero to get maximum frequency
+      // (e.g. 250 Hz on Win10 x64 with AMD Ryzen 5 2400G and one IOWarrior 28)
+      int delay = 500; // 0;
+
       while (!Console.KeyAvailable)
       {
         foreach (var iow in iows)
@@ -45,14 +49,14 @@ namespace Blink
           iow.DigitalWrite(LedDefinitions[iow.Type], iow.LOW);
         }
 
-        Thread.Sleep(500);
+        Thread.Sleep(delay);
 
         foreach (var iow in iows)
         {
           iow.DigitalWrite(LedDefinitions[iow.Type], iow.HIGH);
         }
 
-        Thread.Sleep(500);
+        Thread.Sleep(delay);
       }
 
       FastIOW.CloseConnection();
