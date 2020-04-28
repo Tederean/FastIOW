@@ -11,7 +11,7 @@ namespace Tederean.FastIOW.Internal
   public abstract class IOWarriorBase : IOWarrior
   {
 
-    internal readonly object SyncObject = new object();
+    internal object SyncObject { get; private set; }
 
     public abstract string Name { get; }
 
@@ -50,6 +50,7 @@ namespace Tederean.FastIOW.Internal
     internal IOWarriorBase(IntPtr handle)
     {
       IOWHandle = handle;
+      SyncObject = new object();
       Connected = true;
 
       NativeLib.IowKitSetTimeout(IOWHandle, 400);
