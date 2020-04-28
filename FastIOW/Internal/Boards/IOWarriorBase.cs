@@ -172,7 +172,7 @@ namespace Tederean.FastIOW.Internal
       {
         if (!IsValidDigitalPin(pin))
         {
-          throw new ArgumentNullException("Pin not existing on " + Name + ".");
+          throw new ArgumentException("Pin not existing on " + Name + ".");
         }
 
         CheckClosed();
@@ -187,7 +187,7 @@ namespace Tederean.FastIOW.Internal
       {
         if (!IsValidDigitalPin(pin))
         {
-          throw new ArgumentNullException("Pin not existing on " + Name + ".");
+          throw new ArgumentException("Pin not existing on " + Name + ".");
         }
 
         CheckClosed();
