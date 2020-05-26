@@ -24,20 +24,18 @@ using Tederean.FastIOW.Internal;
 namespace Tederean.FastIOW
 {
 
-  public class IOWarrior28L : IOWarriorBase, I2CDevice
+  public class IOWarrior28L : IOWarriorBase
   {
 
     public override string Name => "IOWarrior28L";
 
     public override IOWarriorType Type => IOWarriorType.IOWarrior28L;
 
-    protected override int StandardReportSize => 5;
+    internal override int StandardReportSize => 5;
 
-    protected override int SpecialReportSize => 64;
+    internal override int SpecialReportSize => 64;
 
-    protected override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
-
-    public I2CInterface I2C { get; private set; }
+    internal override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -66,11 +64,12 @@ namespace Tederean.FastIOW
 
     internal IOWarrior28L(IntPtr handle) : base(handle)
     {
-      I2C = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
+      InterfaceList.Add(new GPIOImplementation(this));
+      InterfaceList.Add(new I2CImplementation(this, Pipe.SPECIAL_MODE, 6));
     }
 
 
-    protected override bool IsValidDigitalPin(int pin)
+    internal override bool IsValidDigitalPin(int pin)
     {
       return pin >= P0_0 && (pin <= P1_7 || pin == P2_1);
     }

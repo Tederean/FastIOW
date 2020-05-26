@@ -18,18 +18,19 @@
  *   MA 02110-1301 USA.
  *
  */
+
 namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// A IOWarrior that offers a PWM interface.
+  /// Represents a generic peripheral of an IOWarrior.
   /// </summary>
-  public interface PWMDevice
+  public interface Peripheral
   {
 
     /// <summary>
-    /// Returns IOWarriors PWM interface.
+    /// Returns the IOWarrior device that this peripheral is belonging to.
     /// </summary>
-    PWMInterface PWM { get; }
+    IOWarrior IOWarrior { get; }
   }
 }

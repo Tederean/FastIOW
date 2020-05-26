@@ -24,7 +24,7 @@ namespace I2C_PCA9555
     public readonly byte PCA9555_CFG_0 = 6;
     public readonly byte PCA9555_CFG_1 = 7;
 
-    public I2CInterface I2C { get; set; }
+    public I2C I2C { get; set; }
 
     public static void Main(string[] args)
     {
@@ -48,8 +48,9 @@ namespace I2C_PCA9555
       FastIOW.OpenConnection();
 
       // Find the first IO-Warrior device which supports I2C
-      var device = FastIOW.GetIOWarriors().Where(entry => entry is I2CDevice).FirstOrDefault();
-      if (device == null)
+      I2C = FastIOW.GetPeripherals<I2C>().FirstOrDefault();
+
+      if (I2C == null)
       {
         FastIOW.CloseConnection();
         Console.WriteLine("Error: No I2C capable IOWarriors detected!");
@@ -57,9 +58,7 @@ namespace I2C_PCA9555
         Environment.Exit(1);
       }
 
-      PrintDeviceInfos(device);
-
-      I2C = (device as I2CDevice).I2C;
+      PrintDeviceInfos(I2C.IOWarrior);
 
       I2C.Enable();
 

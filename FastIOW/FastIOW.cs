@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Tederean.FastIOW.Internal;
@@ -174,6 +175,13 @@ namespace Tederean.FastIOW
         throw new InvalidOperationException("iowkit.dll caused segmentation fault! Try to reinsert your IOWarrior USB devices or reboot your system.", ex);
       }
 
+      if (ex is BadImageFormatException)
+      {
+        var arch = Environment.Is64BitProcess ? 64 : 32;
+
+        throw new InvalidOperationException("iowkit.dll cannot be loaded! Take care that you installed the " + arch + "-bit iowkit version. Check that your project is based on NET-Framework, NET-Core isn't supported.", ex);
+      }
+
       else throw ex;
     }
 
@@ -185,6 +193,24 @@ namespace Tederean.FastIOW
       lock (SyncObject)
       {
         return m_IOWarriors.ToArray();
+      }
+    }
+
+    /// <summary>
+    /// Returns an arry of all supported peripherals using all connected devices.
+    /// </summary>
+    public static T[] GetPeripherals<T>() where T : Peripheral
+    {
+      lock (SyncObject)
+      {
+        var peripherals = new List<T>();
+
+        foreach (var iow in m_IOWarriors)
+        {
+          peripherals.AddRange(iow.InterfaceList.Where(entry => entry is T).Cast<T>());
+        }
+
+        return peripherals.ToArray();
       }
     }
   }

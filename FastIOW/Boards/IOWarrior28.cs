@@ -19,29 +19,26 @@
  *
  */
 using System;
+using System.IO;
 using Tederean.FastIOW.Internal;
 
 namespace Tederean.FastIOW
 {
 
-  public class IOWarrior28 : IOWarriorBase, I2CDevice, ADCDevice
+  public class IOWarrior28 : IOWarriorBase
   {
 
     public override string Name => "IOWarrior28";
 
     public override IOWarriorType Type => IOWarriorType.IOWarrior28;
 
-    protected override int StandardReportSize => 5;
+    internal override int StandardReportSize => 5;
 
-    protected override int SpecialReportSize => 64;
+    internal override int SpecialReportSize => 64;
 
-    protected override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE, Pipe.I2C_MODE, Pipe.ADC_MODE };
+    internal override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE, Pipe.I2C_MODE, Pipe.ADC_MODE };
 
-    private int[] AnalogPins => new[] { ADC_0, ADC_1, ADC_2, ADC_3 };
-
-    public I2CInterface I2C { get; private set; }
-
-    public ADCInterface ADC { get; private set; }
+    internal int[] AnalogPins => new[] { ADC_0, ADC_1, ADC_2, ADC_3 };
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -103,12 +100,18 @@ namespace Tederean.FastIOW
 
     internal IOWarrior28(IntPtr handle) : base(handle)
     {
-      I2C = new I2CInterfaceImplementation(this, Pipe.I2C_MODE, 62);
-      ADC = new ADCInterfaceImplementation(this, Pipe.ADC_MODE, AnalogPins);
+      InterfaceList.Add(new GPIOImplementation(this));
+      InterfaceList.Add(new I2CImplementation(this, Pipe.I2C_MODE, 62));
+
+      try
+      {
+        InterfaceList.Add(new ADCImplementation(this, Pipe.ADC_MODE, AnalogPins));
+      }
+      catch (IOException) { } // USB Dongle
     }
 
 
-    protected override bool IsValidDigitalPin(int pin)
+    internal override bool IsValidDigitalPin(int pin)
     {
       return pin >= P0_0 && (pin <= P2_1 || pin == P3_7);
     }

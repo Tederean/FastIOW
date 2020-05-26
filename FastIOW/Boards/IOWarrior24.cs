@@ -19,33 +19,28 @@
  *
  */
 using System;
+using System.Collections.Generic;
 using Tederean.FastIOW.Internal;
 
 namespace Tederean.FastIOW
 {
 
-  public class IOWarrior24 : IOWarriorBase, I2CDevice, TimerDevice, SPIDevice
+  public class IOWarrior24 : IOWarriorBase
   {
 
     public override string Name => "IOWarrior24";
 
     public override IOWarriorType Type => IOWarriorType.IOWarrior24;
 
-    protected override int StandardReportSize => 3;
+    internal override int StandardReportSize => 3;
 
-    protected override int SpecialReportSize => 8;
+    internal override int SpecialReportSize => 8;
 
-    protected override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
+    internal override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
 
-    private int[] TimerPins => new[] { Timer_1, Timer_2 };
+    internal int[] TimerPins => new[] { Timer_1, Timer_2 };
 
-    public I2CInterface I2C { get; private set; }
-
-    public TimerInterface Timer { get; private set; }
-
-    public SPIInterface SPI { get; private set; }
-
-
+   
     public const int P0_0 = 1 * 8 + 0;
     public const int P0_1 = 1 * 8 + 1;
     public const int P0_2 = 1 * 8 + 2;
@@ -83,13 +78,18 @@ namespace Tederean.FastIOW
 
     internal IOWarrior24(IntPtr handle) : base(handle)
     {
-      I2C = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 6);
-      Timer = new TimerInterfaceImplementation(this, TimerPins);
-      SPI = new SPIInterfaceImplementation(this, 6);
+      InterfaceList.Add(new GPIOImplementation(this));
+      InterfaceList.Add(new I2CImplementation(this, Pipe.SPECIAL_MODE, 6));
+      InterfaceList.Add(new SPIImplementation(this, 6));
+
+      if (Revision >= 0x1030)
+      {
+        InterfaceList.Add(new TimerImplementation(this, TimerPins));
+      }
     }
 
 
-    protected override bool IsValidDigitalPin(int pin)
+    internal override bool IsValidDigitalPin(int pin)
     {
       return pin >= P0_0 && pin <= P1_7;
     }

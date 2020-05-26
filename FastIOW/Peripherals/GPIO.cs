@@ -25,53 +25,41 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Represents a PWM interface of an IOWarrior.
+  /// Represents a GPIO peripheral of an IOWarrior.
   /// </summary>
-  public interface PWMInterface
+  public interface GPIO : Peripheral
   {
 
     /// <summary>
-    /// Returns true if PWM interface is enabled, otherwise false.
+    /// Represents a pin state pulled to low potential by open drain circuit.
     /// </summary>
-    bool Enabled { get; }
+    bool LOW { get; }
 
     /// <summary>
-    /// Returns all PWM capable pins on this IOWarrior.
+    /// Represents a pin state pulled to high potential by pullup resistor.
     /// </summary>
-    int[] PWMPins { get; }
+    bool HIGH { get; }
+
 
     /// <summary>
-    /// Enable PWM interface on this IOWarrior device.
-    /// Set the channels that should be used.
+    /// Event that gets triggered when a pin changes its state.
     /// </summary>
-    /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="IOException"/>
-    void Enable(PWMConfig config);
+    event EventHandler<PinStateChangeEventArgs> PinStateChange;
+
 
     /// <summary>
-    /// Disable PWM interface on this IOWarrior device.
+    /// Set input output pin to given state.
     /// </summary>
-    /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="IOException"/>
-    void Disable();
-
-    /// <summary>
-    /// Write analog 16bit PWM value to given pin.
-    /// Range is from 0 to 65535.
-    /// Frequency is approximately 732 Hz.
-    /// </summary>
-    /// <exception cref="InvalidOperationException"/>
     /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
     /// <exception cref="IOException"/>
-    void AnalogWrite(int pin, ushort value);
-  }
+    void DigitalWrite(int pin, bool state);
 
-  /// <summary>
-  /// Represents a configuation of PWM channels.
-  /// </summary>
-  public enum PWMConfig
-  {
-    PWM_1 = 1,
-    PWM_1To2 = 2,
+    /// <summary>
+    /// Returns state of input output pin.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    bool DigitalRead(int pin);
   }
 }

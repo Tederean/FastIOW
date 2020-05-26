@@ -31,19 +31,19 @@ namespace Button
     {
       FastIOW.OpenConnection();
 
-      if (!FastIOW.Connected)
+      if (FastIOW.GetPeripherals<GPIO>().Length == 0)
       {
         FastIOW.CloseConnection();
-        Console.WriteLine("No IOWarrior detected!");
+        Console.WriteLine("No GPIO capable IOWarrior detected!");
         Console.ReadKey();
         return;
       }
 
       PrintInfos();
 
-      foreach (var iow in FastIOW.GetIOWarriors())
+      foreach (GPIO gpio in FastIOW.GetPeripherals<GPIO>())
       {
-        iow.PinStateChange += OnPinStateChange;
+        gpio.PinStateChange += OnPinStateChange;
       }
 
       Console.WriteLine("\nPress any key to exit.");
@@ -56,7 +56,7 @@ namespace Button
     {
       if (args.Pin == ButtonDefinitions[args.IOWarrior.Type])
       {
-        args.IOWarrior.DigitalWrite(LedDefinitions[args.IOWarrior.Type], args.NewPinState);
+        args.GPIO.DigitalWrite(LedDefinitions[args.IOWarrior.Type], args.NewPinState);
       }
     }
 

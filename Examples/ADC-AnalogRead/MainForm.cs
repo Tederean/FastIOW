@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Windows.Forms;
 using Tederean.FastIOW;
 
@@ -9,7 +8,7 @@ namespace ADC_AnalogRead
   public partial class MainForm : Form
   {
 
-    private Timer PollingTimer { get; set; }
+    private System.Windows.Forms.Timer PollingTimer { get; set; }
 
     // This example takes all ADC capable IOWarriors and reads in all analog inputs.
     public MainForm()
@@ -29,7 +28,7 @@ namespace ADC_AnalogRead
 
       FastIOW.OpenConnection();
 
-      if (FastIOW.GetIOWarriors().Where(entry => entry is ADCDevice).Count() == 0)
+      if (FastIOW.GetPeripherals<ADC>().Length == 0)
       {
         FastIOW.CloseConnection();
         MessageBox.Show("No ADC capable IOWarrior detected!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -37,13 +36,13 @@ namespace ADC_AnalogRead
         return;
       }
 
-      foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is ADCDevice))
+      foreach (ADC adc in FastIOW.GetPeripherals<ADC>())
       {
         // Enable all ADC channels.
-        (iow as ADCDevice).ADC.Enable(ADCConfig.Channel_0To7);
+        adc.Enable(ADCConfig.Channel_0To7);
       }
 
-      PollingTimer = new Timer();
+      PollingTimer = new System.Windows.Forms.Timer();
       PollingTimer.Tick += new EventHandler(OnTick);
       PollingTimer.Interval = 300;
       PollingTimer.Start();
@@ -53,10 +52,10 @@ namespace ADC_AnalogRead
     {
       PollingTimer?.Stop();
 
-      foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is ADCDevice))
+      foreach (ADC adc in FastIOW.GetPeripherals<ADC>())
       {
         // Disable all ADC channels.
-        (iow as ADCDevice).ADC.Disable();
+        adc.Disable();
       }
 
       FastIOW.CloseConnection();
@@ -66,21 +65,19 @@ namespace ADC_AnalogRead
     {
       adcListView.Items.Clear();
 
-      foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is ADCDevice))
+      foreach (ADC adc in FastIOW.GetPeripherals<ADC>())
       {
-        ADCInterface adc = (iow as ADCDevice).ADC;
-
         for (int counter = 0; counter < adc.AnalogPins.Length; counter++)
         {
           double ratio = (adc.AnalogRead(adc.AnalogPins[counter]) / 65535.0);
           double vcc = 5.0;
 
-          if (iow is IOWarrior28)
+          if (adc.IOWarrior is IOWarrior28)
           {
             vcc = 3.3;
           }
 
-          adcListView.Items.Add(new ListViewItem(new[] { iow.Name, iow.SerialNumber, "ADC_" + counter, (ratio * vcc).ToString("#0.00") + "V" }));
+          adcListView.Items.Add(new ListViewItem(new[] { adc.IOWarrior.Name, adc.IOWarrior.SerialNumber, "ADC_" + counter, (ratio * vcc).ToString("#0.00") + "V" }));
         }
       }
     }

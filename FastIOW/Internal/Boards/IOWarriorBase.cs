@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace Tederean.FastIOW.Internal
 {
@@ -11,19 +10,9 @@ namespace Tederean.FastIOW.Internal
   public abstract class IOWarriorBase : IOWarrior
   {
 
-    internal object SyncObject { get; private set; }
-
     public abstract string Name { get; }
 
     public abstract IOWarriorType Type { get; }
-
-    public int Id => ((int)Type);
-
-    protected abstract Pipe[] SupportedPipes { get; }
-
-    protected abstract int StandardReportSize { get; }
-
-    protected abstract int SpecialReportSize { get; }
 
     public string SerialNumber { get; private set; }
 
@@ -31,20 +20,19 @@ namespace Tederean.FastIOW.Internal
 
     public bool Connected { get; private set; }
 
-    private IntPtr IOWHandle { get; set; }
+    public int Id => ((int)Type);
 
-    private byte[] IOPinsWriteReport { get; set; }
+    internal object SyncObject { get; private set; }
 
-    private byte[] IOPinsReadReport { get; set; }
+    internal abstract Pipe[] SupportedPipes { get; }
 
-    private Thread IOThread { get; set; }
+    internal abstract int StandardReportSize { get; }
 
-    public bool LOW => false;
+    internal abstract int SpecialReportSize { get; }
 
-    public bool HIGH => true;
+    internal IntPtr IOWHandle { get; set; }
 
-
-    public event EventHandler<PinStateChangeEventArgs> PinStateChange;
+    internal List<Peripheral> InterfaceList { get; private set; }
 
 
     internal IOWarriorBase(IntPtr handle)
@@ -61,23 +49,11 @@ namespace Tederean.FastIOW.Internal
 
       Revision = NativeLib.IowKitGetRevision(IOWHandle);
 
-      var report = NewReport(Pipe.SPECIAL_MODE);
-      report[0] = ReportId.GPIO_SPECIAL_READ;
-
-      // Get state using special mode
-      WriteReport(report, Pipe.SPECIAL_MODE);
-      var result = ReadReport(Pipe.SPECIAL_MODE).Take(StandardReportSize).ToArray();
-      result[0] = ReportId.GPIO_READ_WRITE;
-
-      IOPinsWriteReport = result.ToArray();
-      IOPinsReadReport = result.ToArray();
-
-      IOThread = new Thread(ProcessIO) { IsBackground = true };
-      IOThread.Start();
+      InterfaceList = new List<Peripheral>();
     }
 
 
-    protected abstract bool IsValidDigitalPin(int pin);
+    internal abstract bool IsValidDigitalPin(int pin);
 
     private void CheckPipe(Pipe pipe)
     {
@@ -96,7 +72,10 @@ namespace Tederean.FastIOW.Internal
     {
       lock (SyncObject)
       {
-        PinStateChange?.GetInvocationList().ToList().ForEach(d => PinStateChange -= (EventHandler<PinStateChangeEventArgs>)d);
+        foreach (var entry in InterfaceList.Where(e => e is GPIOImplementation))
+        {
+          (entry as GPIOImplementation).Shutdown();
+        }
 
         Connected = false;
       }
@@ -104,55 +83,13 @@ namespace Tederean.FastIOW.Internal
 
     internal void Disconnect()
     {
-      IOThread.Join();
-      IOThread = null;
-    }
-
-    private void ProcessIO()
-    {
-      while (Connected)
+      foreach (var entry in InterfaceList.Where(e => e is GPIOImplementation))
       {
-        var result = NewReport(Pipe.IO_PINS);
-
-        if (result.Length != NativeLib.IowKitRead(IOWHandle, Pipe.IO_PINS.Id, result, (uint)result.Length))
-          continue;
-
-        if (!Connected)
-          return;
-
-        for (int index = 1; index < result.Length; index++)
-        {
-          foreach (var bit in Enumerable.Range(0, 7))
-          {
-            bool newState = result[index].GetBit(bit);
-            bool oldState = IOPinsReadReport[index].GetBit(bit);
-            int pin = index * 8 + bit;
-
-            if (newState != oldState)
-            {
-              lock (SyncObject)
-              {
-                IOPinsReadReport[index].SetBit(bit, newState);
-
-                if (PinStateChange != null && IsValidDigitalPin(pin))
-                {
-                  try
-                  {
-                    PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, newState, oldState));
-                  }
-                  catch (Exception)
-                  {
-                    if (Debugger.IsAttached) Debugger.Break();
-                  }
-                }
-              }
-            }
-          }
-        }
+        (entry as GPIOImplementation).WaitForShutdown();
       }
     }
 
-    private void CheckClosed()
+    internal void CheckClosed()
     {
       if (!Connected)
         throw new InvalidOperationException(Name + " (ID: " + string.Format("0x{0:X8}", Id) + " SN: " + SerialNumber + ") is already closed.");
@@ -166,49 +103,39 @@ namespace Tederean.FastIOW.Internal
       return SpecialReportSize;
     }
 
-    public bool DigitalRead(int pin)
+    public T[] GetPeripherals<T>() where T : Peripheral
     {
-      lock (SyncObject)
-      {
-        if (!IsValidDigitalPin(pin))
-        {
-          throw new ArgumentException("Pin not existing on " + Name + ".");
-        }
-
-        CheckClosed();
-
-        return IOPinsReadReport[pin / 8].GetBit(pin % 8);
-      }
+      return InterfaceList.Where(entry => entry is T).Cast<T>().ToArray();
     }
 
-    public void DigitalWrite(int pin, bool state)
+    public T GetPeripheral<T>() where T : Peripheral
     {
-      lock (SyncObject)
-      {
-        if (!IsValidDigitalPin(pin))
-        {
-          throw new ArgumentException("Pin not existing on " + Name + ".");
-        }
-
-        CheckClosed();
-
-        if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != state)
-        {
-          IOPinsWriteReport[pin / 8].SetBit(pin % 8, state);
-
-          WriteReport(IOPinsWriteReport, Pipe.IO_PINS);
-        }
-      }
+      return InterfaceList.Where(entry => entry is T).Cast<T>().FirstOrDefault();
     }
 
-    public byte[] NewReport(Pipe pipe)
+    /// <summary>
+    /// Returns a new report at given pipe size. All bytes set to be zero.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    internal byte[] NewReport(Pipe pipe)
     {
       CheckPipe(pipe);
 
       return Enumerable.Repeat((byte)0x0, ReportSize(pipe)).ToArray();
     }
 
-    public byte[] ReadReport(Pipe pipe)
+    /// <summary>
+    /// Returns byte array report read from IOWarrior device using given pipe.
+    /// This method blocks until new data arrived from IOWarrior or timeout
+    /// of 400ms expired, which results in an IOException.
+    /// Use this method only if you know what you are doing.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    internal byte[] ReadReport(Pipe pipe)
     {
       lock (SyncObject)
       {
@@ -226,7 +153,16 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
-    public bool TryReadReport(Pipe pipe, out byte[] report)
+    /// <summary>
+    /// Try to read byte array report from IOWarrior device using given pipe.
+    /// This method blocks until new data arrived from IOWarrior or timeout of 400ms expired.
+    /// Returns true if report contains new data, otherwise false.
+    /// Use this method only if you know what you are doing.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    internal bool TryReadReport(Pipe pipe, out byte[] report)
     {
       lock (SyncObject)
       {
@@ -239,7 +175,15 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
-    public bool TryReadReportNonBlocking(Pipe pipe, out byte[] report)
+    /// <summary>
+    /// Read byte array report from IOWarrior device using given pipe.
+    /// This method returns immediately - true if report contains new data, otherwise false.
+    /// Use this method only if you know what you are doing.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    internal bool TryReadReportNonBlocking(Pipe pipe, out byte[] report)
     {
       lock (SyncObject)
       {
@@ -252,7 +196,32 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
-    public void WriteReport(byte[] report, Pipe pipe)
+    /// <summary>
+    /// Write byte array report generated by NewReport()
+    /// to IOWarrior device, using given pipe.
+    /// Use this method only if you know what you are doing.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    internal void WriteReport(byte[] report, Pipe pipe)
+    {
+      if (!TryWriteReport(report, pipe))
+      {
+        throw new IOException("Error while writing data.");
+      }
+    }
+
+    /// <summary>
+    /// Try to write byte array report generated by NewReport()
+    /// to IOWarrior device, using given pipe.
+    /// Use this method only if you know what you are doing.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    internal bool TryWriteReport(byte[] report, Pipe pipe)
     {
       lock (SyncObject)
       {
@@ -261,10 +230,7 @@ namespace Tederean.FastIOW.Internal
 
         if (ReportSize(pipe) != report.Length) throw new ArgumentException("Wrong report size!");
 
-        if (report.Length != NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length))
-        {
-          throw new IOException("Error while writing data.");
-        }
+        return report.Length == NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length);
       }
     }
   }

@@ -25,54 +25,53 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Represents a ADC interface of an IOWarrior.
+  /// Represents a PWM peripheral of an IOWarrior.
   /// </summary>
-  public interface ADCInterface
+  public interface PWM : Peripheral
   {
 
     /// <summary>
-    /// Returns true if internal analog to digital converter is enabled, otherwise false.
+    /// Returns true if PWM interface is enabled, otherwise false.
     /// </summary>
     bool Enabled { get; }
 
     /// <summary>
-    /// Returns all ADC capable pins on this IOWarrior.
+    /// Returns all PWM capable pins on this IOWarrior.
     /// </summary>
-    int[] AnalogPins { get; }
+    int[] PWMPins { get; }
 
     /// <summary>
-    /// Enable ADC interface on this IOWarrior device.
+    /// Enable PWM interface on this IOWarrior device.
     /// Set the channels that should be used.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
-    /// <exception cref="ArgumentException"/>
     /// <exception cref="IOException"/>
-    void Enable(ADCConfig config);
+    void Enable(PWMConfig config);
 
     /// <summary>
-    /// Disable ADC interface on this IOWarrior device.
+    /// Disable PWM interface on this IOWarrior device.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
     /// <exception cref="IOException"/>
     void Disable();
 
     /// <summary>
-    /// Returns analog value of given pin. Value ranges from 0 to 65535, equals GND to VCC.
+    /// Write analog 16bit PWM value to given pin.
+    /// Range is from 0 to 65535.
+    /// Frequency is approximately 732 Hz.
     /// </summary>
     /// <exception cref="InvalidOperationException"/>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="IOException"/>
-    ushort AnalogRead(int pin);
+    void AnalogWrite(int pin, ushort value);
   }
 
   /// <summary>
-  /// Represents a configuation of ADC channels.
+  /// Represents a configuation of PWM channels.
   /// </summary>
-  public enum ADCConfig
+  public enum PWMConfig
   {
-    Channel_0 = 1,
-    Channel_0To1 = 2,
-    Channel_0To3 = 4,
-    Channel_0To7 = 8,
+    PWM_1 = 1,
+    PWM_1To2 = 2,
   }
 }

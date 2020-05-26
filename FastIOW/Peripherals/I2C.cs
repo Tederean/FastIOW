@@ -25,9 +25,9 @@ namespace Tederean.FastIOW
 {
 
   /// <summary>
-  /// Represents a I2C interface of an IOWarrior.
+  /// Represents a I2C peripheral of an IOWarrior.
   /// </summary>
-  public interface I2CInterface
+  public interface I2C : Peripheral
   {
 
     /// <summary>

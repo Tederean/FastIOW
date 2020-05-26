@@ -26,69 +26,68 @@ using System.Linq;
 namespace Tederean.FastIOW.Internal
 {
 
-  public class I2CInterfaceImplementation : I2CInterface
+  public class I2CImplementation : I2C
   {
 
     public bool Enabled { get; private set; }
 
-    private IOWarriorBase IOWarrior { get; set; }
+    private IOWarriorBase IOWarriorBase { get; set; }
+
+    public IOWarrior IOWarrior => IOWarriorBase;
 
     private Pipe I2CPipe { get; set; }
 
     private int I2CPacketLength { get; set; }
 
 
-    internal I2CInterfaceImplementation(IOWarriorBase IOWarrior, Pipe I2CPipe, int I2CPacketLength)
+    internal I2CImplementation(IOWarriorBase IOWarriorBase, Pipe I2CPipe, int I2CPacketLength)
     {
-      this.IOWarrior = IOWarrior;
+      this.IOWarriorBase = IOWarriorBase;
       this.I2CPipe = I2CPipe;
       this.I2CPacketLength = I2CPacketLength;
 
       // Set to a secure state.
-      Enabled = true;
       Disable();
     }
 
 
     public void Enable()
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
-        var report = IOWarrior.NewReport(I2CPipe);
+        var report = IOWarriorBase.NewReport(I2CPipe);
 
         report[0] = ReportId.I2C_SETUP;
         report[1] = 0x01; // Enable
 
-        IOWarrior.WriteReport(report, I2CPipe);
+        IOWarriorBase.WriteReport(report, I2CPipe);
         Enabled = true;
       }
     }
 
     public void Disable()
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
-        if (!Enabled) return;
-
-        var report = IOWarrior.NewReport(I2CPipe);
+        var report = IOWarriorBase.NewReport(I2CPipe);
 
         report[0] = ReportId.I2C_SETUP;
         report[1] = 0x00; // Disable
 
-        IOWarrior.WriteReport(report, I2CPipe);
+        IOWarriorBase.WriteReport(report, I2CPipe);
         Enabled = false;
       }
     }
 
     public void WriteBytes(byte address, params byte[] data)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("I2C interface is not enabled.");
         if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
         if (data.Length > (I2CPacketLength - 1)) throw new ArgumentException("Data length must be between 0 and " + (I2CPacketLength - 1) + ".");
 
-        var report = IOWarrior.NewReport(I2CPipe);
+        var report = IOWarriorBase.NewReport(I2CPipe);
 
         report[0] = ReportId.I2C_WRITE;
 
@@ -107,9 +106,9 @@ namespace Tederean.FastIOW.Internal
           report[3 + index] = data[index];
         }
 
-        IOWarrior.WriteReport(report, I2CPipe);
+        IOWarriorBase.WriteReport(report, I2CPipe);
 
-        var result = IOWarrior.ReadReport(I2CPipe);
+        var result = IOWarriorBase.ReadReport(I2CPipe);
 
         if (result[0] != ReportId.I2C_WRITE)
         {
@@ -123,7 +122,7 @@ namespace Tederean.FastIOW.Internal
           throw new IOException("Error while writing data.");
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56 || IOWarrior.Type == IOWarriorType.IOWarrior28)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56 || IOWarriorBase.Type == IOWarriorType.IOWarrior28)
         {
           if (result[1].GetBit(6))
           {
@@ -135,13 +134,13 @@ namespace Tederean.FastIOW.Internal
 
     public byte[] ReadBytes(byte address, int length)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("I2C is not enabled.");
         if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
         if (length > I2CPacketLength || length < 0) throw new ArgumentException("Data length must be between 0 and " + I2CPacketLength + ".");
 
-        var report = IOWarrior.NewReport(I2CPipe);
+        var report = IOWarriorBase.NewReport(I2CPipe);
 
         report[0] = ReportId.I2C_READ;
 
@@ -151,9 +150,9 @@ namespace Tederean.FastIOW.Internal
         report[2] = (byte)(address << 1);
         report[2].SetBit(0, true); // true -> read
 
-        IOWarrior.WriteReport(report, I2CPipe);
+        IOWarriorBase.WriteReport(report, I2CPipe);
 
-        var result = IOWarrior.ReadReport(I2CPipe);
+        var result = IOWarriorBase.ReadReport(I2CPipe);
 
         if (result[0] != ReportId.I2C_READ)
         {
@@ -167,7 +166,7 @@ namespace Tederean.FastIOW.Internal
           throw new IOException("Error while reading data.");
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56 && result[1].GetBit(6))
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56 && result[1].GetBit(6))
         {
           throw new IOException("Error while reading data, arbitration lost.");
         }

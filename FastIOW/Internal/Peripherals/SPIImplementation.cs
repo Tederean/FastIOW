@@ -25,42 +25,48 @@ using System.Linq;
 namespace Tederean.FastIOW.Internal
 {
 
-  public class SPIInterfaceImplementation : SPIInterface
+  public class SPIImplementation : SPI
   {
 
     public bool Enabled { get; private set; }
 
-    private IOWarriorBase IOWarrior { get; set; }
+    private IOWarriorBase IOWarriorBase { get; set; }
+
+    public IOWarrior IOWarrior => IOWarriorBase;
 
     private int SPIPacketLength { get; set; }
 
 
-    internal SPIInterfaceImplementation(IOWarriorBase IOWarrior, int SPIPacketLength)
+    internal SPIImplementation(IOWarriorBase IOWarriorBase, int SPIPacketLength)
     {
-      this.IOWarrior = IOWarrior;
+      this.IOWarriorBase = IOWarriorBase;
       this.SPIPacketLength = SPIPacketLength;
 
       // Set to a secure state.
-      Enabled = true;
       Disable();
     }
 
 
     public void Enable()
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
-        if (IOWarrior is IOWarrior56 && ((IOWarrior as IOWarrior56).PWM as PWMInterfaceImplementation).SelectedChannels == PWMConfig.PWM_1To2)
+        if (IOWarriorBase is IOWarrior56)
         {
-          throw new InvalidOperationException("SPI cannot be used while PWM_2 is enabled.");
+          var pwm = IOWarriorBase.GetPeripheral<PWM>() as PWMImplementation;
+
+          if (pwm != null && pwm.SelectedChannels == PWMConfig.PWM_1To2)
+          {
+            throw new InvalidOperationException("SPI cannot be used while PWM_2 is enabled.");
+          }
         }
 
-        var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+        var report = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
 
         report[0] = ReportId.SPI_SETUP;
         report[1] = 0x01; // Enable
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56)
         {
           // SPI Mode 0, msb first
           report[2] = 0x00;
@@ -69,45 +75,43 @@ namespace Tederean.FastIOW.Internal
           report[3] = 0x02;
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior24)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior24)
         {
           // SPI Mode 0, msb first, 1MBit/sec
           report[2] = 0x05;
         }
 
-        IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+        IOWarriorBase.WriteReport(report, Pipe.SPECIAL_MODE);
         Enabled = true;
       }
     }
 
     public void Disable()
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
-        if (!Enabled) return;
-
-        var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+        var report = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
 
         report[0] = ReportId.SPI_SETUP;
         report[1] = 0x00; // Disable
 
-        IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+        IOWarriorBase.WriteReport(report, Pipe.SPECIAL_MODE);
         Enabled = false;
       }
     }
 
     public byte[] TransferBytes(params byte[] data)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("SPI interface is not enabled.");
         if (data.Length < 1 || data.Length > SPIPacketLength) throw new ArgumentException("Data length must be between 1 and " + SPIPacketLength + ".");
 
-        var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+        var report = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
 
         report[0] = ReportId.SPI_TRANSFER;
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56)
         {
           // Count
           report[1] = (byte)data.Length;
@@ -122,7 +126,7 @@ namespace Tederean.FastIOW.Internal
           }
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior24)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior24)
         {
           // Count & Flags -> no DRDY, SS stays not acive
           report[1] = (byte)data.Length;
@@ -134,9 +138,9 @@ namespace Tederean.FastIOW.Internal
           }
         }
 
-        IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+        IOWarriorBase.WriteReport(report, Pipe.SPECIAL_MODE);
 
-        var result = IOWarrior.ReadReport(Pipe.SPECIAL_MODE);
+        var result = IOWarriorBase.ReadReport(Pipe.SPECIAL_MODE);
 
         if (result[0] != ReportId.SPI_TRANSFER)
         {

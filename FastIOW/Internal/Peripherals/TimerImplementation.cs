@@ -26,10 +26,12 @@ using System.Threading;
 namespace Tederean.FastIOW.Internal
 {
 
-  public class TimerInterfaceImplementation : TimerInterface
+  public class TimerImplementation : Timer
   {
 
-    private IOWarriorBase IOWarrior { get; set; }
+    private IOWarriorBase IOWarriorBase { get; set; }
+
+    public IOWarrior IOWarrior => IOWarriorBase;
 
     private int[] m_TimerPins;
     public int[] TimerPins
@@ -41,9 +43,9 @@ namespace Tederean.FastIOW.Internal
     private int TimerState { get; set; }
 
 
-    internal TimerInterfaceImplementation(IOWarriorBase IOWarrior, int[] TimerPins)
+    internal TimerImplementation(IOWarriorBase IOWarriorBase, int[] TimerPins)
     {
-      this.IOWarrior = IOWarrior;
+      this.IOWarriorBase = IOWarriorBase;
       this.TimerPins = TimerPins;
 
       // Set to a secure state.
@@ -63,15 +65,13 @@ namespace Tederean.FastIOW.Internal
 
     public int PulseIn(int pin, bool value, TimeSpan timeout, TimeSpan interval)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Array.Exists<int>(TimerPins, element => element == pin)) throw new ArgumentException("Not a Timer capable pin.");
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior24)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior24)
         {
-          if (IOWarrior.Revision < 0x1030) throw new InvalidOperationException("PulseIn is only supported by IOWarrior firmware 1.0.3.0 or higher.");
-
-          if (pin == IOWarrior24.Timer_2 && (IOWarrior as IOWarrior24).I2C.Enabled)
+          if (pin == IOWarrior24.Timer_2 && (IOWarriorBase.GetPeripheral<I2C>()?.Enabled ?? false))
           {
             throw new InvalidOperationException("Timer_2 cannot be used while I2C is enabled.");
           }
@@ -101,7 +101,7 @@ namespace Tederean.FastIOW.Internal
 
       while ((DateTime.UtcNow - start) < timeout)
       {
-        if (IOWarrior.TryReadReportNonBlocking(Pipe.SPECIAL_MODE, out byte[] report))
+        if (IOWarriorBase.TryReadReportNonBlocking(Pipe.SPECIAL_MODE, out byte[] report))
         {
           int span;
           if (report[0] == id && (span = ReportToTimeSpan(report, value)) > -1)
@@ -149,12 +149,12 @@ namespace Tederean.FastIOW.Internal
 
     private void SetTimerMode(int state)
     {
-      var report = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+      var report = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
 
       report[0] = ReportId.TIMER_SETUP;
       report[1] = (byte)state; // Channels
 
-      IOWarrior.WriteReport(report, Pipe.SPECIAL_MODE);
+      IOWarriorBase.WriteReport(report, Pipe.SPECIAL_MODE);
       TimerState = state;
     }
 

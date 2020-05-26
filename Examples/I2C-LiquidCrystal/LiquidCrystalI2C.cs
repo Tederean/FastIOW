@@ -55,7 +55,7 @@ namespace I2C_LiquidCrystal
 		public const int Rs = 0b00000001;  // Register select bit
 
 
-		private I2CInterface I2C { set; get; }
+		private I2C I2C { set; get; }
 		private int Addr { set; get; }
 		private int Displayfunction { set; get; }
 		private int Displaycontrol { set; get; }
@@ -66,7 +66,7 @@ namespace I2C_LiquidCrystal
 		private int Backlightval { set; get; }
 
 
-		public LiquidCrystalI2C(I2CInterface i2c, int lcd_addr, int lcd_cols, int lcd_rows, int charsize = LCD_5x8DOTS)
+		public LiquidCrystalI2C(I2C i2c, int lcd_addr, int lcd_cols, int lcd_rows, int charsize = LCD_5x8DOTS)
 		{
 			I2C = i2c;
 			Addr = lcd_addr;

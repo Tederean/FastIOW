@@ -25,12 +25,14 @@ using System.Linq;
 namespace Tederean.FastIOW.Internal
 {
 
-  public class ADCInterfaceImplementation : ADCInterface
+  public class ADCImplementation : ADC
   {
 
     public bool Enabled { get; private set; }
 
-    private IOWarriorBase IOWarrior { get; set; }
+    private IOWarriorBase IOWarriorBase { get; set; }
+
+    public IOWarrior IOWarrior => IOWarriorBase;
 
     private Pipe ADCPipe { get; set; }
 
@@ -44,85 +46,80 @@ namespace Tederean.FastIOW.Internal
     private ADCConfig SelectedChannels { get; set; }
 
 
-    internal ADCInterfaceImplementation(IOWarriorBase IOWarrior, Pipe ADCPipe, int[] AnalogPins)
+    internal ADCImplementation(IOWarriorBase IOWarriorBase, Pipe ADCPipe, int[] AnalogPins)
     {
-      this.IOWarrior = IOWarrior;
+      this.IOWarriorBase = IOWarriorBase;
       this.ADCPipe = ADCPipe;
       this.AnalogPins = AnalogPins;
 
       // Set to a secure state.
-      Enabled = true;
       Disable();
     }
 
 
     public void Enable(ADCConfig config)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enum.IsDefined(typeof(ADCConfig), config)) throw new ArgumentException("Invalid channel.");
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior28)
         {
           SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To3);
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56)
         {
-          if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("ADC interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
-
           SelectedChannels = (ADCConfig)Math.Min((byte)config, (byte)ADCConfig.Channel_0To7);
         }
 
         Disable(); // ADC has be disabled before changing adc setup.
 
-        var report = IOWarrior.NewReport(ADCPipe);
+        var report = IOWarriorBase.NewReport(ADCPipe);
 
         report[0] = ReportId.ADC_SETUP;
         report[1] = 0x01; // Enable
         report[2] = (byte)SelectedChannels; // Channel size
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior28)
         {
           report[5] = 0x01; // Continuous measuring
           report[6] = 0x04; // Sample rate of 6 kHz
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56)
         {
           report[3] = 0x02; // Measurement range from GND to VCC.
         }
 
-        IOWarrior.WriteReport(report, ADCPipe);
+        IOWarriorBase.WriteReport(report, ADCPipe);
         Enabled = true;
       }
     }
 
     public void Disable()
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
-        if (!Enabled) return;
-
-        var report = IOWarrior.NewReport(ADCPipe);
+        var report = IOWarriorBase.NewReport(ADCPipe);
 
         report[0] = ReportId.ADC_SETUP;
         report[1] = 0x00; // ADC Disable
 
-        IOWarrior.WriteReport(report, ADCPipe);
+        IOWarriorBase.WriteReport(report, ADCPipe);
         Enabled = false;
       }
     }
 
     public ushort AnalogRead(int pin)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("ADC interface is not enabled.");
         if (!Array.Exists<int>(AnalogPins, element => element == pin)) throw new ArgumentException("Not an ADC capable pin.");
         if (!IsChannelActivated(pin)) throw new ArgumentException("ADC channel not enabled.");
 
-        var result = IOWarrior.ReadReport(ADCPipe);
+        var result = IOWarriorBase.ReadReport(ADCPipe);
 
         if (result[0] != ReportId.ADC_READ)
         {
@@ -133,7 +130,7 @@ namespace Tederean.FastIOW.Internal
 
         int index = PinToChannelIndex(pin);
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56)
         {
           var lsb = result[1 + 2 * index];
           var msb = result[2 + 2 * index];
@@ -142,7 +139,7 @@ namespace Tederean.FastIOW.Internal
           return (ushort)(((msb << 8) + lsb) << 2);
         }
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior28)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior28)
         {
           var lsb = result[2 + 2 * index];
           var msb = result[3 + 2 * index];

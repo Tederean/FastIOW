@@ -9,7 +9,7 @@ namespace SPI_MCP4922
   public partial class MainForm : Form
   {
 
-    private SPIDevice iow;
+    private SPI SPI { get; set; }
 
     // This example takes a single SPI capable IOWarrior to control an MCP4922, an external 12bit DAC with 2 channels.
     public MainForm()
@@ -18,9 +18,9 @@ namespace SPI_MCP4922
       FormClosing += OnFormClosingEvent;
 
       FastIOW.OpenConnection();
-      iow = (SPIDevice)FastIOW.GetIOWarriors().Where(entry => entry is SPIDevice).FirstOrDefault();
+      SPI = FastIOW.GetPeripherals<SPI>().FirstOrDefault();
 
-      if (iow == null)
+      if (SPI == null)
       {
         FastIOW.CloseConnection();
         MessageBox.Show("No SPI capable IOWarrior detected!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -28,7 +28,7 @@ namespace SPI_MCP4922
         return;
       }
 
-      iow.SPI.Enable();
+      SPI.Enable();
 
       m_TrackBar1.Maximum = 4095;
       m_TrackBar1.ValueChanged += OnScrollEvent1;
@@ -66,14 +66,14 @@ namespace SPI_MCP4922
       byte lowByte = (byte)(value & 0xFF);
       byte highByte = (byte)(((value >> 8) & 0xff) | channel << 7 | 1 << 5 | 1 << 4);
 
-      iow.SPI.TransferBytes(highByte, lowByte);
+      SPI.TransferBytes(highByte, lowByte);
     }
 
     private void OnFormClosingEvent(Object sender, FormClosingEventArgs e)
     {
-      if (iow != null)
+      if (SPI != null)
       {
-        iow.SPI.Disable();
+        SPI.Disable();
       }
 
       FastIOW.CloseConnection();

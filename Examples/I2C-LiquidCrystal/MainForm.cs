@@ -9,7 +9,7 @@ namespace I2C_LiquidCrystal
   public partial class MainForm : Form
   {
 
-    private I2CDevice iow;
+    private I2C I2C;
 
     private LiquidCrystalI2C display;
 
@@ -25,9 +25,9 @@ namespace I2C_LiquidCrystal
       FormClosing += OnFormClosingEvent;
 
       FastIOW.OpenConnection();
-      iow = (I2CDevice)FastIOW.GetIOWarriors().Where(entry => entry is I2CDevice).FirstOrDefault();
+      I2C = FastIOW.GetPeripherals<I2C>().FirstOrDefault();
 
-      if (iow == null)
+      if (I2C == null)
       {
         FastIOW.CloseConnection();
         MessageBox.Show("No I2C capable IOWarrior detected!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -35,9 +35,9 @@ namespace I2C_LiquidCrystal
         return;
       }
 
-      iow.I2C.Enable();
+      I2C.Enable();
 
-      display = new LiquidCrystalI2C(iow.I2C, DisplayAddress, DisplayColumns, DisplayRows);
+      display = new LiquidCrystalI2C(I2C, DisplayAddress, DisplayColumns, DisplayRows);
       display.Begin();
       display.Backlight();
       display.Clear();
@@ -45,9 +45,9 @@ namespace I2C_LiquidCrystal
 
     private void OnFormClosingEvent(Object sender, FormClosingEventArgs e)
     {
-      if (iow != null)
+      if (I2C != null)
       {
-        iow.I2C.Disable();
+        I2C.Disable();
       }
 
       FastIOW.CloseConnection();

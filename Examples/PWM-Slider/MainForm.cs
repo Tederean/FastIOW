@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Tederean.FastIOW;
@@ -9,26 +10,31 @@ namespace PWM_Slider
   public partial class MainForm : Form
   {
 
-    private IOWarrior56 iow;
+    private static readonly Dictionary<IOWarriorType, int> PwmDefinitions = new Dictionary<IOWarriorType, int>()
+    {
+      { IOWarriorType.IOWarrior56, IOWarrior56.PWM_1 }
+    };
 
-    // This example takes a single IOWarrior56 to dimm a LED on port P6.7 alias P7.7 using a TrackBar.
+    private PWM PWM { get; set; }
+
+    // This example takes a single PWM capable IOWarrior to dimm a LED using a TrackBar.
     public MainForm()
     {
       InitializeComponent();
       FormClosing += OnFormClosingEvent;
 
       FastIOW.OpenConnection();
-      iow = (IOWarrior56)FastIOW.GetIOWarriors().Where(entry => entry is IOWarrior56).FirstOrDefault();
+      PWM = FastIOW.GetPeripherals<PWM>().FirstOrDefault();
 
-      if (iow == null)
+      if (PWM == null)
       {
         FastIOW.CloseConnection();
-        MessageBox.Show("No IOWarrior56 detected!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show("No PWM capable IOWarrior detected!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         Environment.Exit(1);
         return;
       }
 
-      iow.PWM.Enable(PWMConfig.PWM_1);
+      PWM.Enable(PWMConfig.PWM_1);
 
       m_TrackBar.Maximum = UInt16.MaxValue;
       m_TrackBar.ValueChanged += OnScrollEvent;
@@ -36,14 +42,14 @@ namespace PWM_Slider
 
     private void OnScrollEvent(object sender, EventArgs e)
     {
-      iow.PWM.AnalogWrite(IOWarrior56.PWM_1, (ushort)m_TrackBar.Value);
+      PWM.AnalogWrite(PwmDefinitions[PWM.IOWarrior.Type], (ushort)m_TrackBar.Value);
     }
 
     private void OnFormClosingEvent(Object sender, FormClosingEventArgs e)
     {
-      if (iow != null)
+      if (PWM != null)
       {
-        iow.PWM.Disable();
+        PWM.Disable();
       }
 
       FastIOW.CloseConnection();

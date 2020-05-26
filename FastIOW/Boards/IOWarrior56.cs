@@ -19,35 +19,28 @@
  *
  */
 using System;
+using System.IO;
 using Tederean.FastIOW.Internal;
 
 namespace Tederean.FastIOW
 {
 
-  public class IOWarrior56 : IOWarriorBase, I2CDevice, ADCDevice, PWMDevice, SPIDevice
+  public class IOWarrior56 : IOWarriorBase
   {
 
     public override string Name => "IOWarrior56";
 
     public override IOWarriorType Type => IOWarriorType.IOWarrior56;
 
-    protected override int StandardReportSize => 8;
+    internal override int StandardReportSize => 8;
 
-    protected override int SpecialReportSize => 64;
+    internal override int SpecialReportSize => 64;
 
-    protected override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
+    internal override Pipe[] SupportedPipes => new[] { Pipe.IO_PINS, Pipe.SPECIAL_MODE };
 
-    private int[] AnalogPins => new[] { ADC_0, ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7 };
+    internal int[] AnalogPins => new[] { ADC_0, ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7 };
 
-    private int[] PWMPins => new[] { PWM_1, PWM_2 };
-
-    public I2CInterface I2C { get; private set; }
-
-    public ADCInterface ADC { get; private set; }
-
-    public PWMInterface PWM { get; private set; }
-
-    public SPIInterface SPI { get; private set; }
+    internal int[] PWMPins => new[] { PWM_1, PWM_2 };
 
 
     public const int P0_0 = 1 * 8 + 0;
@@ -153,14 +146,28 @@ namespace Tederean.FastIOW
 
     internal IOWarrior56(IntPtr handle) : base(handle)
     {
-      I2C = new I2CInterfaceImplementation(this, Pipe.SPECIAL_MODE, 62);
-      ADC = new ADCInterfaceImplementation(this, Pipe.SPECIAL_MODE, AnalogPins);
-      PWM = new PWMInterfaceImplementation(this, PWMPins);
-      SPI = new SPIInterfaceImplementation(this, 61);
+      InterfaceList.Add(new GPIOImplementation(this));
+      InterfaceList.Add(new I2CImplementation(this, Pipe.SPECIAL_MODE, 62));
+      InterfaceList.Add(new SPIImplementation(this, 61));
+
+      if (Revision >= 0x2000)
+      {
+        try
+        {
+          InterfaceList.Add(new PWMImplementation(this, PWMPins));
+        }
+        catch (IOException) { } // USB Dongle
+
+        try
+        {
+          InterfaceList.Add(new ADCImplementation(this, Pipe.SPECIAL_MODE, AnalogPins));
+        }
+        catch (IOException) { } // USB Dongle
+      }
     }
 
 
-    protected override bool IsValidDigitalPin(int pin)
+    internal override bool IsValidDigitalPin(int pin)
     {
       return pin >= P0_0 && (pin <= P6_0 || pin == P6_7);
     }

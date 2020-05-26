@@ -24,12 +24,14 @@ using System.Linq;
 namespace Tederean.FastIOW.Internal
 {
 
-  public class PWMInterfaceImplementation : PWMInterface
+  public class PWMImplementation : PWM
   {
 
     public bool Enabled { get; private set; }
 
-    private IOWarriorBase IOWarrior { get; set; }
+    private IOWarriorBase IOWarriorBase { get; set; }
+
+    public IOWarrior IOWarrior => IOWarriorBase;
 
     private int[] m_PWMPins;
     public int[] PWMPins
@@ -67,13 +69,13 @@ namespace Tederean.FastIOW.Internal
     }
 
 
-    internal PWMInterfaceImplementation(IOWarriorBase IOWarrior, int[] PWMPins)
+    internal PWMImplementation(IOWarriorBase IOWarriorBase, int[] PWMPins)
     {
-      this.IOWarrior = IOWarrior;
+      this.IOWarriorBase = IOWarriorBase;
       this.PWMPins = PWMPins;
 
       // PWM setup: Output frequency ~ 732 Hz at 16bit resolution.
-      PWMWriteReport = IOWarrior.NewReport(Pipe.SPECIAL_MODE);
+      PWMWriteReport = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
       PWMWriteReport[0] = ReportId.PWM_SETUP;
 
       // Set Per1 to 65535
@@ -91,26 +93,23 @@ namespace Tederean.FastIOW.Internal
       PWMWriteReport[11] = 0x03;
 
       // Set to a secure state.
-      Enabled = true;
       Disable();
     }
 
 
     public void Enable(PWMConfig config)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enum.IsDefined(typeof(PWMConfig), config)) throw new ArgumentException("Invalid channel.");
 
-        if (IOWarrior.Type == IOWarriorType.IOWarrior56)
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56)
         {
-          if (IOWarrior.Revision < 0x2000) throw new InvalidOperationException("PWM interface is only supported by IOWarrior firmware 2.0.0.0 or higher.");
-
           if (config == PWMConfig.PWM_1To2)
           {
-            if (IOWarrior.Revision < 0x2002) throw new InvalidOperationException("PWM_2 is only supported by IOWarrior firmware 2.0.0.2 or higher.");
+            if (IOWarriorBase.Revision < 0x2002) throw new InvalidOperationException("PWM_2 is only supported by IOWarrior firmware 2.0.0.2 or higher.");
 
-            if ((IOWarrior as IOWarrior56).SPI.Enabled) throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
+            if (IOWarriorBase.GetPeripheral<SPI>()?.Enabled ?? false) throw new InvalidOperationException("PWM_2 cannot be used while SPI is enabled.");
           }
         }
 
@@ -118,27 +117,25 @@ namespace Tederean.FastIOW.Internal
         PWM1 = 0;
         PWM2 = 0;
 
-        IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+        IOWarriorBase.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
         Enabled = true;
       }
     }
 
     public void Disable()
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
-        if (!Enabled) return;
-
         SelectedChannels = 0x00; // Disable
 
-        IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+        IOWarriorBase.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
         Enabled = false;
       }
     }
 
     public void AnalogWrite(int pin, ushort value)
     {
-      lock (IOWarrior.SyncObject)
+      lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("PWM interface is not enabled.");
         if (!Array.Exists<int>(PWMPins, element => element == pin)) throw new ArgumentException("Not a PWM capable pin.");
@@ -149,7 +146,7 @@ namespace Tederean.FastIOW.Internal
         if (index == 0) PWM1 = value;
         if (index == 1) PWM2 = value;
 
-        IOWarrior.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
+        IOWarriorBase.WriteReport(PWMWriteReport, Pipe.SPECIAL_MODE);
       }
     }
 

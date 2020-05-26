@@ -24,10 +24,10 @@ namespace Blink
     {
       FastIOW.OpenConnection();
 
-      if (!FastIOW.Connected)
+      if (FastIOW.GetPeripherals<GPIO>().Length == 0)
       {
         FastIOW.CloseConnection();
-        Console.WriteLine("No IOWarrior detected!");
+        Console.WriteLine("No GPIO capable IOWarrior detected!");
         Console.ReadKey();
         return;
       }
@@ -36,24 +36,22 @@ namespace Blink
 
       Console.WriteLine("\nPress any key to exit.");
 
-      IOWarrior[] iows = FastIOW.GetIOWarriors();
-
       // Set delay to zero to get maximum frequency
       // (e.g. 250 Hz on Win10 x64 with AMD Ryzen 5 2400G and one IOWarrior 28)
       int delay = 500; // 0;
 
       while (!Console.KeyAvailable)
       {
-        foreach (var iow in iows)
+        foreach (GPIO gpio in FastIOW.GetPeripherals<GPIO>())
         {
-          iow.DigitalWrite(LedDefinitions[iow.Type], iow.LOW);
+          gpio.DigitalWrite(LedDefinitions[gpio.IOWarrior.Type], gpio.LOW);
         }
 
         Thread.Sleep(delay);
 
-        foreach (var iow in iows)
+        foreach (GPIO gpio in FastIOW.GetPeripherals<GPIO>())
         {
-          iow.DigitalWrite(LedDefinitions[iow.Type], iow.HIGH);
+          gpio.DigitalWrite(LedDefinitions[gpio.IOWarrior.Type], gpio.HIGH);
         }
 
         Thread.Sleep(delay);

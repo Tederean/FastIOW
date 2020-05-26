@@ -26,10 +26,8 @@ namespace I2C_Scan
 
       Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", "Name", "Unique Identifier", "Serial Number", "I2C Address"));
 
-      foreach (IOWarrior iow in FastIOW.GetIOWarriors().Where(entry => entry is I2CDevice))
+      foreach (I2C i2c in FastIOW.GetPeripherals<I2C>())
       {
-        I2CInterface i2c = (iow as I2CDevice).I2C;
-
         i2c.Enable();
 
         foreach (byte address in Enumerable.Range(0, 127))
@@ -40,7 +38,7 @@ namespace I2C_Scan
             i2c.WriteBytes(address);
 
             // This is only called when I2C device send a response.
-            Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", iow.Name, string.Format("0x{0:X8}", iow.Id), iow.SerialNumber, string.Format("0x{0:X2}", address)));
+            Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", i2c.IOWarrior.Name, string.Format("0x{0:X8}", i2c.IOWarrior.Id), i2c.IOWarrior.SerialNumber, string.Format("0x{0:X2}", address)));
           }
           catch (IOException) { }
         }
