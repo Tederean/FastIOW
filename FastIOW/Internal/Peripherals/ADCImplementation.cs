@@ -37,7 +37,7 @@ namespace Tederean.FastIOW.Internal
     private Pipe ADCPipe { get; set; }
 
     private int[]  m_AnalogPins;
-    public int[] AnalogPins
+    public int[] SupportedPins
     { 
       get => m_AnalogPins?.ToArray() ?? default;
       private set => m_AnalogPins = value;
@@ -50,7 +50,7 @@ namespace Tederean.FastIOW.Internal
     {
       this.IOWarriorBase = IOWarriorBase;
       this.ADCPipe = ADCPipe;
-      this.AnalogPins = AnalogPins;
+      this.SupportedPins = AnalogPins;
 
       // Set to a secure state.
       Disable();
@@ -116,7 +116,7 @@ namespace Tederean.FastIOW.Internal
       lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("ADC interface is not enabled.");
-        if (!Array.Exists<int>(AnalogPins, element => element == pin)) throw new ArgumentException("Not an ADC capable pin.");
+        if (!Array.Exists<int>(SupportedPins, element => element == pin)) throw new ArgumentException("Not an ADC capable pin.");
         if (!IsChannelActivated(pin)) throw new ArgumentException("ADC channel not enabled.");
 
         var result = IOWarriorBase.ReadReport(ADCPipe);
@@ -154,7 +154,7 @@ namespace Tederean.FastIOW.Internal
 
     private int PinToChannelIndex(int pin)
     {
-      return Array.IndexOf<int>(AnalogPins, pin);
+      return Array.IndexOf<int>(SupportedPins, pin);
     }
 
     private bool IsChannelActivated(int pin)

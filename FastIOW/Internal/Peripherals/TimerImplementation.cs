@@ -34,7 +34,7 @@ namespace Tederean.FastIOW.Internal
     public IOWarrior IOWarrior => IOWarriorBase;
 
     private int[] m_TimerPins;
-    public int[] TimerPins
+    public int[] SupportedPins
     {
       get => m_TimerPins?.ToArray() ?? default;
       private set => m_TimerPins = value;
@@ -46,7 +46,7 @@ namespace Tederean.FastIOW.Internal
     internal TimerImplementation(IOWarriorBase IOWarriorBase, int[] TimerPins)
     {
       this.IOWarriorBase = IOWarriorBase;
-      this.TimerPins = TimerPins;
+      this.SupportedPins = TimerPins;
 
       // Set to a secure state.
       SetTimerMode(0x00);
@@ -67,7 +67,7 @@ namespace Tederean.FastIOW.Internal
     {
       lock (IOWarriorBase.SyncObject)
       {
-        if (!Array.Exists<int>(TimerPins, element => element == pin)) throw new ArgumentException("Not a Timer capable pin.");
+        if (!Array.Exists<int>(SupportedPins, element => element == pin)) throw new ArgumentException("Not a Timer capable pin.");
 
         if (IOWarriorBase.Type == IOWarriorType.IOWarrior24)
         {
@@ -160,7 +160,7 @@ namespace Tederean.FastIOW.Internal
 
     private int PinToChannelIndex(int pin)
     {
-      return Array.IndexOf<int>(TimerPins, pin);
+      return Array.IndexOf<int>(SupportedPins, pin);
     }
 
     private int PinToReportId(int pin)

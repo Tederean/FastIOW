@@ -38,7 +38,7 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns all PWM capable pins on this IOWarrior.
     /// </summary>
-    int[] PWMPins { get; }
+    int[] SupportedPins { get; }
 
     /// <summary>
     /// Enable PWM interface on this IOWarrior device.

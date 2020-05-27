@@ -31,21 +31,14 @@ namespace Tederean.FastIOW
   {
 
     /// <summary>
-    /// Represents a pin state pulled to low potential by open drain circuit.
+    /// Returns all GPIO capable pins on this IOWarrior.
     /// </summary>
-    bool LOW { get; }
-
-    /// <summary>
-    /// Represents a pin state pulled to high potential by pullup resistor.
-    /// </summary>
-    bool HIGH { get; }
-
+    int[] SupportedPins { get; }
 
     /// <summary>
     /// Event that gets triggered when a pin changes its state.
     /// </summary>
     event EventHandler<PinStateChangeEventArgs> PinStateChange;
-
 
     /// <summary>
     /// Set input output pin to given state.
@@ -53,13 +46,22 @@ namespace Tederean.FastIOW
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
     /// <exception cref="IOException"/>
-    void DigitalWrite(int pin, bool state);
+    void DigitalWrite(int pin, PinState state);
 
     /// <summary>
     /// Returns state of input output pin.
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
-    bool DigitalRead(int pin);
+    PinState DigitalRead(int pin);
+  }
+
+  /// <summary>
+  /// Represents a digital state of a GPIO.
+  /// </summary>
+  public enum PinState
+  {
+    LOW = 0,
+    HIGH = 1,
   }
 }

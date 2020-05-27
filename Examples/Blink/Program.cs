@@ -44,14 +44,14 @@ namespace Blink
       {
         foreach (GPIO gpio in FastIOW.GetPeripherals<GPIO>())
         {
-          gpio.DigitalWrite(LedDefinitions[gpio.IOWarrior.Type], gpio.LOW);
+          gpio.DigitalWrite(LedDefinitions[gpio.IOWarrior.Type], PinState.LOW);
         }
 
         Thread.Sleep(delay);
 
         foreach (GPIO gpio in FastIOW.GetPeripherals<GPIO>())
         {
-          gpio.DigitalWrite(LedDefinitions[gpio.IOWarrior.Type], gpio.HIGH);
+          gpio.DigitalWrite(LedDefinitions[gpio.IOWarrior.Type], PinState.HIGH);
         }
 
         Thread.Sleep(delay);

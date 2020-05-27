@@ -39,9 +39,12 @@ namespace Tederean.FastIOW.Internal
 
     internal Thread IOThread { get; private set; }
 
-    public bool LOW => false;
-
-    public bool HIGH => true;
+    private int[] m_GpioPins;
+    public int[] SupportedPins
+    {
+      get => m_GpioPins?.ToArray() ?? default;
+      private set => m_GpioPins = value;
+    }
 
     public event EventHandler<PinStateChangeEventArgs> PinStateChange;
 
@@ -49,6 +52,7 @@ namespace Tederean.FastIOW.Internal
     internal GPIOImplementation(IOWarriorBase IOWarriorBase)
     {
       this.IOWarriorBase = IOWarriorBase;
+      this.SupportedPins = Enumerable.Range(0, 255).Where(e => IOWarriorBase.IsValidDigitalPin(e)).ToArray();
 
       var report = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
       report[0] = ReportId.GPIO_SPECIAL_READ;
@@ -74,6 +78,24 @@ namespace Tederean.FastIOW.Internal
     {
       IOThread.Join();
       IOThread = null;
+    }
+
+    private PinState ToPinState(bool value)
+    {
+      return value ? PinState.HIGH : PinState.LOW;
+    }
+
+    private bool ToBool(PinState value)
+    {
+      switch (value)
+      {
+        case (PinState.LOW):
+          return false;
+        case (PinState.HIGH):
+          return true;
+        default:
+          throw new ArgumentException("Invalid PinState.");
+      }
     }
 
     private void ProcessIO()
@@ -106,7 +128,7 @@ namespace Tederean.FastIOW.Internal
                 {
                   try
                   {
-                    PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, newState, oldState));
+                    PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, ToPinState(newState), ToPinState(oldState)));
                   }
                   catch (Exception)
                   {
@@ -120,7 +142,7 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
-    public bool DigitalRead(int pin)
+    public PinState DigitalRead(int pin)
     {
       lock (IOWarriorBase.SyncObject)
       {
@@ -131,14 +153,16 @@ namespace Tederean.FastIOW.Internal
 
         IOWarriorBase.CheckClosed();
 
-        return IOPinsReadReport[pin / 8].GetBit(pin % 8);
+        return ToPinState(IOPinsReadReport[pin / 8].GetBit(pin % 8));
       }
     }
 
-    public void DigitalWrite(int pin, bool state)
+    public void DigitalWrite(int pin, PinState state)
     {
       lock (IOWarriorBase.SyncObject)
       {
+        if (!Enum.IsDefined(typeof(PinState), state)) throw new ArgumentException("Invalid PinState.");
+
         if (!IOWarriorBase.IsValidDigitalPin(pin))
         {
           throw new ArgumentException("Pin not existing on " + IOWarriorBase.Name + ".");
@@ -146,9 +170,9 @@ namespace Tederean.FastIOW.Internal
 
         IOWarriorBase.CheckClosed();
 
-        if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != state)
+        if (IOPinsWriteReport[pin / 8].GetBit(pin % 8) != ToBool(state))
         {
-          IOPinsWriteReport[pin / 8].SetBit(pin % 8, state);
+          IOPinsWriteReport[pin / 8].SetBit(pin % 8, ToBool(state));
 
           IOWarriorBase.WriteReport(IOPinsWriteReport, Pipe.IO_PINS);
         }

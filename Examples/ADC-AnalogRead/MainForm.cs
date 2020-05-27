@@ -67,9 +67,9 @@ namespace ADC_AnalogRead
 
       foreach (ADC adc in FastIOW.GetPeripherals<ADC>())
       {
-        for (int counter = 0; counter < adc.AnalogPins.Length; counter++)
+        for (int counter = 0; counter < adc.SupportedPins.Length; counter++)
         {
-          double ratio = (adc.AnalogRead(adc.AnalogPins[counter]) / 65535.0);
+          double ratio = (adc.AnalogRead(adc.SupportedPins[counter]) / 65535.0);
           double vcc = 5.0;
 
           if (adc.IOWarrior is IOWarrior28)

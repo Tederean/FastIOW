@@ -47,15 +47,15 @@ namespace Tederean.FastIOW
     /// <summary>
     /// State that is pin switching to.
     /// </summary>
-    public bool NewPinState { get; private set; }
+    public PinState NewPinState { get; private set; }
 
     /// <summary>
     /// State that is pin switching from.
     /// </summary>
-    public bool OldPinState { get; private set; }
+    public PinState OldPinState { get; private set; }
 
 
-    internal PinStateChangeEventArgs(GPIO GPIO, int Pin, bool NewPinState, bool OldPinState)
+    internal PinStateChangeEventArgs(GPIO GPIO, int Pin, PinState NewPinState, PinState OldPinState)
     {
       this.GPIO = GPIO;
       this.Pin = Pin;

@@ -34,7 +34,7 @@ namespace Tederean.FastIOW.Internal
     public IOWarrior IOWarrior => IOWarriorBase;
 
     private int[] m_PWMPins;
-    public int[] PWMPins
+    public int[] SupportedPins
     {
       get => m_PWMPins?.ToArray() ?? default;
       private set => m_PWMPins = value;
@@ -72,7 +72,7 @@ namespace Tederean.FastIOW.Internal
     internal PWMImplementation(IOWarriorBase IOWarriorBase, int[] PWMPins)
     {
       this.IOWarriorBase = IOWarriorBase;
-      this.PWMPins = PWMPins;
+      this.SupportedPins = PWMPins;
 
       // PWM setup: Output frequency ~ 732 Hz at 16bit resolution.
       PWMWriteReport = IOWarriorBase.NewReport(Pipe.SPECIAL_MODE);
@@ -138,7 +138,7 @@ namespace Tederean.FastIOW.Internal
       lock (IOWarriorBase.SyncObject)
       {
         if (!Enabled) throw new InvalidOperationException("PWM interface is not enabled.");
-        if (!Array.Exists<int>(PWMPins, element => element == pin)) throw new ArgumentException("Not a PWM capable pin.");
+        if (!Array.Exists<int>(SupportedPins, element => element == pin)) throw new ArgumentException("Not a PWM capable pin.");
         if (!IsChannelActivated(pin)) throw new ArgumentException("PWM channel not enabled.");
 
         int index = PinToChannelIndex(pin);
@@ -152,7 +152,7 @@ namespace Tederean.FastIOW.Internal
 
     private int PinToChannelIndex(int pin)
     {
-      return Array.IndexOf<int>(PWMPins, pin);
+      return Array.IndexOf<int>(SupportedPins, pin);
     }
 
     private bool IsChannelActivated(int pin)

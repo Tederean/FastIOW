@@ -100,20 +100,29 @@ namespace Tederean.FastIOW
 
     internal IOWarrior28(IntPtr handle) : base(handle)
     {
-      InterfaceList.Add(new GPIOImplementation(this));
-      InterfaceList.Add(new I2CImplementation(this, Pipe.I2C_MODE, 62));
-
-      try
+      if (IsNotDongleVersion())
       {
+        InterfaceList.Add(new GPIOImplementation(this));
         InterfaceList.Add(new ADCImplementation(this, Pipe.ADC_MODE, AnalogPins));
       }
-      catch (IOException) { } // USB Dongle
+
+      InterfaceList.Add(new I2CImplementation(this, Pipe.I2C_MODE, 62));
     }
 
 
     internal override bool IsValidDigitalPin(int pin)
     {
       return pin >= P0_0 && (pin <= P2_1 || pin == P3_7);
+    }
+
+    private bool IsNotDongleVersion()
+    {
+      var report = NewReport(Pipe.ADC_MODE);
+
+      report[0] = ReportId.ADC_SETUP;
+      report[1] = 0x00; // ADC Disable
+
+      return TryWriteReport(report, Pipe.ADC_MODE);
     }
   }
 }

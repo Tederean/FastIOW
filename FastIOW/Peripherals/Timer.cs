@@ -33,7 +33,7 @@ namespace Tederean.FastIOW
     /// <summary>
     /// Returns all Timer capable pins on this IOWarrior.
     /// </summary>
-    int[] TimerPins { get; }
+    int[] SupportedPins { get; }
 
     /// <summary>
     /// Reads a pulse on a pin in micro seconds. True for a positive pulse,
