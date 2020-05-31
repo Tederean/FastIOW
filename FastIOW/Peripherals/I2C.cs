@@ -50,6 +50,13 @@ namespace Tederean.FastIOW
     void Disable();
 
     /// <summary>
+    /// Check if slave for given 7bit I2C address is responding.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    bool IsAvailable(byte address);
+
+    /// <summary>
     /// Write bytes to given 7bit I2C address - msb first.
     /// </summary>
     /// <exception cref="ArgumentException"/>

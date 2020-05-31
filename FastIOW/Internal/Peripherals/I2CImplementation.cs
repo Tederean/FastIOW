@@ -79,43 +79,30 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
+    public bool IsAvailable(byte address)
+    {
+      lock (IOWarriorBase.SyncObject)
+      {
+        var result = WriteBytesInternal(address);
+
+        // Error while writing data.
+        if (result[1].GetBit(7)) return false;
+
+        if (IOWarriorBase.Type == IOWarriorType.IOWarrior56 || IOWarriorBase.Type == IOWarriorType.IOWarrior28)
+        {
+          // Error while writing data, arbitration lost.
+          if (result[1].GetBit(6)) return false;
+        }
+
+        return true;
+      }
+    }
+
     public void WriteBytes(byte address, params byte[] data)
     {
       lock (IOWarriorBase.SyncObject)
       {
-        if (!Enabled) throw new InvalidOperationException("I2C interface is not enabled.");
-        if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
-        if (data.Length > (I2CPacketLength - 1)) throw new ArgumentException("Data length must be between 0 and " + (I2CPacketLength - 1) + ".");
-
-        var report = IOWarriorBase.NewReport(I2CPipe);
-
-        report[0] = ReportId.I2C_WRITE;
-
-        // Write IOW I2C settings
-        report[1] = (byte)(1 + data.Length);
-        report[1].SetBit(7, true); // Enable start bit
-        report[1].SetBit(6, true); // Enable stop bit
-
-        // Write address byte
-        report[2] = (byte)(address << 1);
-        report[2].SetBit(0, false); // false -> write
-
-        // Write data bytes
-        for (int index = 0; index < data.Length; index++)
-        {
-          report[3 + index] = data[index];
-        }
-
-        IOWarriorBase.WriteReport(report, I2CPipe);
-
-        var result = IOWarriorBase.ReadReport(I2CPipe);
-
-        if (result[0] != ReportId.I2C_WRITE)
-        {
-          if (Debugger.IsAttached) Debugger.Break();
-
-          throw new InvalidOperationException("Recieved wrong packet!");
-        }
+        var result = WriteBytesInternal(address);
 
         if (result[1].GetBit(7))
         {
@@ -130,6 +117,45 @@ namespace Tederean.FastIOW.Internal
           }
         }
       }
+    }
+
+    private byte[] WriteBytesInternal(byte address, params byte[] data)
+    {
+      if (!Enabled) throw new InvalidOperationException("I2C interface is not enabled.");
+      if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
+      if (data.Length > (I2CPacketLength - 1)) throw new ArgumentException("Data length must be between 0 and " + (I2CPacketLength - 1) + ".");
+
+      var report = IOWarriorBase.NewReport(I2CPipe);
+
+      report[0] = ReportId.I2C_WRITE;
+
+      // Write IOW I2C settings
+      report[1] = (byte)(1 + data.Length);
+      report[1].SetBit(7, true); // Enable start bit
+      report[1].SetBit(6, true); // Enable stop bit
+
+      // Write address byte
+      report[2] = (byte)(address << 1);
+      report[2].SetBit(0, false); // false -> write
+
+      // Write data bytes
+      for (int index = 0; index < data.Length; index++)
+      {
+        report[3 + index] = data[index];
+      }
+
+      IOWarriorBase.WriteReport(report, I2CPipe);
+
+      var result = IOWarriorBase.ReadReport(I2CPipe);
+
+      if (result[0] != ReportId.I2C_WRITE)
+      {
+        if (Debugger.IsAttached) Debugger.Break();
+
+        throw new InvalidOperationException("Recieved wrong packet!");
+      }
+
+      return result;
     }
 
     public byte[] ReadBytes(byte address, int length)

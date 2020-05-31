@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Tederean.FastIOW;
 
@@ -32,15 +31,10 @@ namespace I2C_Scan
 
         foreach (byte address in Enumerable.Range(0, 127))
         {
-          try
+          if (i2c.IsAvailable(address))
           {
-            // Throws IOException when I2C device is not responding.
-            i2c.WriteBytes(address);
-
-            // This is only called when I2C device send a response.
             Console.WriteLine(string.Format("|{0,20}|{1,20}|{2,20}|{3,20}|", i2c.IOWarrior.Name, string.Format("0x{0:X8}", i2c.IOWarrior.Id), i2c.IOWarrior.SerialNumber, string.Format("0x{0:X2}", address)));
           }
-          catch (IOException) { }
         }
 
         i2c.Disable();
