@@ -23,3 +23,7 @@ You can find some software examples [here](https://github.com/Tederean/FastIOW/t
 This library requires iowkit.dll in version 1.5, that is part of the official SDK, you can download it [here](https://www.codemercs.com/downloads/iowarrior/IO-Warrior_SDK_win.zip). Extract the following file "/sdk/iowkit api/x64 dll/iowkit.dll", store it in "C:\Windows\System32" folder.
 
 Download [FastIOW.dll](https://github.com/Tederean/FastIOW/releases/download/V1.4/FastIOW.dll) and [FastIOW.xml](https://github.com/Tederean/FastIOW/releases/download/V1.4/FastIOW.xml). Store both files in "C:\Windows\SysWOW64" folder.
+
+Open properties of your project/solution in VisualStudio. Click on build tab, uncheck 'Prefer 32-bit' and select as plattform target 'Any CPU'.
+
+Have fun!
