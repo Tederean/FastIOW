@@ -85,5 +85,43 @@ namespace Tederean.FastIOW
 
       return Convert.ToBoolean(value & (1 << index));
     }
+
+    /// <summary>
+    /// Apply OR bit masking to a byte. The bit mask can be inverted before masking.
+    /// Returns the masking result.
+    /// </summary>
+    public static byte MaskOr(this byte value, byte bitmask, bool invertBitmask = false)
+    {
+      var intValue = (int)value;
+      var intBitmask = (int)bitmask;
+
+      if (invertBitmask)
+      {
+        intBitmask = ~intBitmask;
+      }
+
+      var intResult = intValue | intBitmask;
+
+      return Convert.ToByte(intResult & 0xFF);
+    }
+
+    /// <summary>
+    /// Apply AND bit masking to a byte. The bit mask can be inverted before masking.
+    /// Returns the masking result.
+    /// </summary>
+    public static byte MaskAnd(this byte value, byte bitmask, bool invertBitmask = false)
+    {
+      var intValue = (int)value;
+      var intBitmask = (int)bitmask;
+
+      if (invertBitmask)
+      {
+        intBitmask = ~intBitmask;
+      }
+
+      var intResult = intValue & intBitmask;
+
+      return Convert.ToByte(intResult & 0xFF);
+    }
   }
 }
