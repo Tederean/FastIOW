@@ -201,11 +201,30 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
+    public byte ReadByte(byte address)
+    {
+      return ReadBytes(address, 1).ElementAt(0);
+    }
+
     public ushort Read2Bytes(byte address)
     {
       var result = ReadBytes(address, 2);
 
       return (ushort)((result[0] << 8) + result[1]);
+    }
+
+    public uint Read3Bytes(byte address)
+    {
+      var result = ReadBytes(address, 3);
+
+      return (uint)((result[0] << 16) + (result[1] << 8) + result[2]);
+    }
+
+    public uint Read4Bytes(byte address)
+    {
+      var result = ReadBytes(address, 4);
+
+      return (uint)((result[0] << 24) + (result[1] << 16) + (result[2] << 8) + result[3]);
     }
   }
 }

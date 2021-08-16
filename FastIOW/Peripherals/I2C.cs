@@ -74,11 +74,35 @@ namespace Tederean.FastIOW
     byte[] ReadBytes(byte address, int length);
 
     /// <summary>
+    /// Read in single byte from given 7bit I2C address.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    byte ReadByte(byte address);
+
+    /// <summary>
     /// Returns read in two bytes from given 7bit I2C address.
     /// </summary>
     /// <exception cref="ArgumentException"/>
     /// <exception cref="InvalidOperationException"/>
     /// <exception cref="IOException"/>
     ushort Read2Bytes(byte address);
+
+    /// <summary>
+    /// Returns read in three bytes from given 7bit I2C address.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    uint Read3Bytes(byte address);
+
+    /// <summary>
+    /// Returns read in four bytes from given 7bit I2C address.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidOperationException"/>
+    /// <exception cref="IOException"/>
+    uint Read4Bytes(byte address);
   }
 }
