@@ -8,10 +8,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Button</RootNamespace>
     <AssemblyName>Button</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -53,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FastIOW\FastIOW.csproj">
-      <Project>{83EB95D8-EA60-4D21-B2A2-1FF65255F98B}</Project>
+      <Project>{7521a9cd-f7a0-4eb1-90e3-fc348f07c734}</Project>
       <Name>FastIOW</Name>
     </ProjectReference>
   </ItemGroup>

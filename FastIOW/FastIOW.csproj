@@ -1,81 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{83EB95D8-EA60-4D21-B2A2-1FF65255F98B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FastIOW</RootNamespace>
-    <AssemblyName>FastIOW</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\FastIOW.xml</DocumentationFile>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Boards\IOWarrior28L.cs" />
-    <Compile Include="Boards\IOWarrior28.cs" />
-    <Compile Include="Boards\IOWarrior56.cs" />
-    <Compile Include="EventArgs\PinStateChangeEventArgs.cs" />
-    <Compile Include="Extensions\IntegerExtensions.cs" />
-    <Compile Include="Extensions\ByteExtensions.cs" />
-    <Compile Include="FastIOW.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Peripherals\GPIO.cs" />
-    <Compile Include="Peripherals\Peripheral.cs" />
-    <Compile Include="Peripherals\PWM.cs" />
-    <Compile Include="Peripherals\SPI.cs" />
-    <Compile Include="Peripherals\Timer.cs" />
-    <Compile Include="Internal\Peripherals\ADCImplementation.cs" />
-    <Compile Include="Internal\Enumeration.cs" />
-    <Compile Include="Internal\Peripherals\GPIOImplementation.cs" />
-    <Compile Include="Internal\Peripherals\SPIImplementation.cs" />
-    <Compile Include="Internal\Peripherals\TimerImplementation.cs" />
-    <Compile Include="Internal\NativeLib.cs" />
-    <Compile Include="Peripherals\ADC.cs" />
-    <Compile Include="Peripherals\I2C.cs" />
-    <Compile Include="Internal\Peripherals\I2CImplementation.cs" />
-    <Compile Include="Boards\IOWarrior.cs" />
-    <Compile Include="Boards\IOWarrior24.cs" />
-    <Compile Include="Boards\IOWarrior40.cs" />
-    <Compile Include="Internal\Boards\IOWarriorBase.cs" />
-    <Compile Include="Internal\Peripherals\PWMImplementation.cs" />
-    <Compile Include="IOWarriorType.cs" />
-    <Compile Include="ReportId.cs" />
-    <Compile Include="Pipe.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Remove="Resources\iowkit_64.dll" />
+    <None Remove="Resources\iowkit_x86.dll" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\iowkit_64.dll" />
+    <EmbeddedResource Include="Resources\iowkit_x86.dll" />
+  </ItemGroup>
+
 </Project>

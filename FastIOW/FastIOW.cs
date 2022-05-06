@@ -61,11 +61,13 @@ namespace Tederean.FastIOW
 
         try
         {
-          m_DevHandle = NativeLib.IowKitOpenDevice();
+          IowkitLibraryHandler.ExtractNativeLibrary();
+
+          m_DevHandle = IowkitLibrary.IowKitOpenDevice();
 
           if (m_DevHandle == IntPtr.Zero) return false;
 
-          uint deviceCount = NativeLib.IowKitGetNumDevs();
+          uint deviceCount = IowkitLibrary.IowKitGetNumDevs();
 
           for (uint index = 0; index < deviceCount; index++)
           {
@@ -98,8 +100,8 @@ namespace Tederean.FastIOW
     {
       try
       {
-        IntPtr handle = NativeLib.IowKitGetDeviceHandle(index + 1);
-        IOWarriorType id = (IOWarriorType)NativeLib.IowKitGetProductId(handle);
+        IntPtr handle = IowkitLibrary.IowKitGetDeviceHandle(index + 1);
+        IOWarriorType id = (IOWarriorType)IowkitLibrary.IowKitGetProductId(handle);
 
         if (id == IOWarriorType.IOWarrior40)
         {
@@ -149,7 +151,7 @@ namespace Tederean.FastIOW
         {
           try
           {
-            NativeLib.IowKitCloseDevice(m_DevHandle);
+            IowkitLibrary.IowKitCloseDevice(m_DevHandle);
           }
           catch (Exception ex)
           {

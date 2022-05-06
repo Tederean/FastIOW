@@ -41,13 +41,13 @@ namespace Tederean.FastIOW.Internal
       SyncObject = new object();
       Connected = true;
 
-      NativeLib.IowKitSetTimeout(IOWHandle, 400);
+      IowkitLibrary.IowKitSetTimeout(IOWHandle, 400);
 
       StringBuilder serialNumberBuilder = new StringBuilder();
-      NativeLib.IowKitGetSerialNumber(IOWHandle, serialNumberBuilder);
+      IowkitLibrary.IowKitGetSerialNumber(IOWHandle, serialNumberBuilder);
       SerialNumber = serialNumberBuilder.ToString();
 
-      Revision = NativeLib.IowKitGetRevision(IOWHandle);
+      Revision = IowkitLibrary.IowKitGetRevision(IOWHandle);
 
       InterfaceList = new List<Peripheral>();
     }
@@ -144,7 +144,7 @@ namespace Tederean.FastIOW.Internal
 
         var report = NewReport(pipe);
 
-        if (report.Length != NativeLib.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length))
+        if (report.Length != IowkitLibrary.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length))
         {
           throw new IOException("Error while reading data.");
         }
@@ -171,7 +171,7 @@ namespace Tederean.FastIOW.Internal
 
         report = NewReport(pipe);
 
-        return report.Length == NativeLib.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length);
+        return report.Length == IowkitLibrary.IowKitRead(IOWHandle, pipe.Id, report, (uint)report.Length);
       }
     }
 
@@ -192,7 +192,7 @@ namespace Tederean.FastIOW.Internal
 
         report = NewReport(pipe);
 
-        return report.Length == NativeLib.IowKitReadNonBlocking(IOWHandle, pipe.Id, report, (uint)report.Length);
+        return report.Length == IowkitLibrary.IowKitReadNonBlocking(IOWHandle, pipe.Id, report, (uint)report.Length);
       }
     }
 
@@ -230,7 +230,7 @@ namespace Tederean.FastIOW.Internal
 
         if (ReportSize(pipe) != report.Length) throw new ArgumentException("Wrong report size!");
 
-        return report.Length == NativeLib.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length);
+        return report.Length == IowkitLibrary.IowKitWrite(IOWHandle, pipe.Id, report, (uint)report.Length);
       }
     }
   }

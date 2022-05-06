@@ -104,7 +104,7 @@ namespace Tederean.FastIOW.Internal
       {
         var result = IOWarriorBase.NewReport(Pipe.IO_PINS);
 
-        if (result.Length != NativeLib.IowKitRead(IOWarriorBase.IOWHandle, Pipe.IO_PINS.Id, result, (uint)result.Length))
+        if (result.Length != IowkitLibrary.IowKitRead(IOWarriorBase.IOWHandle, Pipe.IO_PINS.Id, result, (uint)result.Length))
           continue;
 
         if (!IOWarriorBase.Connected)
