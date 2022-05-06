@@ -120,20 +120,17 @@ namespace Tederean.FastIOW.Internal
 
             if (newState != oldState)
             {
-              lock (IOWarriorBase.SyncObject)
-              {
-                IOPinsReadReport[index].SetBit(bit, newState);
+              IOPinsReadReport[index].SetBit(bit, newState);
 
-                if (PinStateChange != null && IOWarriorBase.IsValidDigitalPin(pin))
+              if (PinStateChange != null && IOWarriorBase.IsValidDigitalPin(pin))
+              {
+                try
                 {
-                  try
-                  {
-                    PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, ToPinState(newState), ToPinState(oldState)));
-                  }
-                  catch (Exception)
-                  {
-                    if (Debugger.IsAttached) Debugger.Break();
-                  }
+                  PinStateChange.Invoke(this, new PinStateChangeEventArgs(this, pin, ToPinState(newState), ToPinState(oldState)));
+                }
+                catch (Exception)
+                {
+                  if (Debugger.IsAttached) Debugger.Break();
                 }
               }
             }
