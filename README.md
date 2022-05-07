@@ -1,6 +1,6 @@
 # FastIOW
 
-FastIOW is a .NET Framework Library for fast and easy, arduino-like access to Code Mercenaries [IOWarrior](https://www.codemercs.com/io) devices.
+FastIOW is a dotnet library for fast and easy, arduino-like access to Code Mercenaries [IOWarrior](https://www.codemercs.com/io) devices.
 
 This library simplifies the way of handling communication between computer and IOWarrior by abstracting and simplifing various components. It gives newcomers the ability to achive first results quickly.
 
@@ -18,12 +18,8 @@ Experienced developers can use this library to get things fast and and with mini
   
 You can find some software examples [here](https://github.com/Tederean/FastIOW/tree/master/Examples).
 
-## Installation (64-bit operating system)
+## Installation
 
-This library requires iowkit.dll in version 1.5, that is part of the official SDK, you can download it [here](https://www.codemercs.com/downloads/iowarrior/IO-Warrior_SDK_win.zip). Extract the following file "/sdk/iowkit api/x64 dll/iowkit.dll", store it in "C:\Windows\System32" folder.
-
-Download [FastIOW.dll](https://github.com/Tederean/FastIOW/releases/download/V1.4.1/FastIOW.dll) and [FastIOW.xml](https://github.com/Tederean/FastIOW/releases/download/V1.4.1/FastIOW.xml). Store both files in "C:\Windows\SysWOW64" folder.
-
-Open properties of your project/solution in VisualStudio. Click on build tab, uncheck 'Prefer 32-bit' and select as plattform target 'Any CPU'.
+This library is available via [Nuget](https://www.nuget.org/packages/FastIOW) .
 
 Have fun!

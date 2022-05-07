@@ -12,7 +12,7 @@ namespace Tederean.FastIOW.Internal
   public static class IowkitLibrary
   {
 
-    public const string NativeLibraryName = "iowkit";
+    public const string NativeLibraryName = "FastIOWNative";
 
 
     /// <summary>

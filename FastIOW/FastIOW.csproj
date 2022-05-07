@@ -1,7 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>MIT</Copyright>
+    <PackageProjectUrl>https://github.com/Tederean/FastIOW</PackageProjectUrl>
+    <PackageId>FastIOW</PackageId>
+    <Version>1.5</Version>
+    <Authors>Tederean</Authors>
+    <Product>FastIOW</Product>
+    <Description>FastIOW is a dotnet library for fast and easy, arduino-like access to Code Mercenaries IOWarrior devices.</Description>
+    <RepositoryUrl>https://github.com/Tederean/FastIOW</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +37,19 @@
     <EmbeddedResource Include="Resources\libiowkit_linux_aarch64.so" />
     <EmbeddedResource Include="Resources\libiowkit_linux_amd64.so" />
     <EmbeddedResource Include="Resources\libiowkit_linux_arm32.so" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
