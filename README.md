@@ -20,6 +20,6 @@ You can find some software examples [here](https://github.com/Tederean/FastIOW/t
 
 ## Installation
 
-This library is available via [Nuget](https://www.nuget.org/packages/FastIOW) .
+This library is available via [Nuget](https://www.nuget.org/packages/FastIOW).
 
 Have fun!
