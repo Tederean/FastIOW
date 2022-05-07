@@ -13,6 +13,8 @@
   <ItemGroup>
     <None Remove="Resources\iowkit_windows_x64.dll" />
     <None Remove="Resources\iowkit_windows_x86.dll" />
+    <None Remove="Resources\libiowkit_linux_aarch64.so" />
+    <None Remove="Resources\libiowkit_linux_amd64.so" />
     <None Remove="Resources\libiowkit_linux_arm32.so" />
     <None Remove="Resources\libiowkit_linux_x64.so" />
   </ItemGroup>
@@ -20,8 +22,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\iowkit_windows_x64.dll" />
     <EmbeddedResource Include="Resources\iowkit_windows_x86.dll" />
+    <EmbeddedResource Include="Resources\libiowkit_linux_aarch64.so" />
+    <EmbeddedResource Include="Resources\libiowkit_linux_amd64.so" />
     <EmbeddedResource Include="Resources\libiowkit_linux_arm32.so" />
-    <EmbeddedResource Include="Resources\libiowkit_linux_x64.so" />
   </ItemGroup>
 
 </Project>

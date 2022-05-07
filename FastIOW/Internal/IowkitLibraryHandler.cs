@@ -18,8 +18,9 @@ namespace Tederean.FastIOW.Internal
         new PlatformLibrary(OSPlatform.Windows, Architecture.X86, "iowkit_windows_x86.dll"),
         new PlatformLibrary(OSPlatform.Windows, Architecture.X64, "iowkit_windows_x64.dll"),
 
-        new PlatformLibrary(OSPlatform.Linux, Architecture.X64, "libiowkit_linux_x64.so"),
+        new PlatformLibrary(OSPlatform.Linux, Architecture.X64, "libiowkit_linux_amd64.so"),
         new PlatformLibrary(OSPlatform.Linux, Architecture.Arm, "libiowkit_linux_arm32.so"),
+        new PlatformLibrary(OSPlatform.Linux, Architecture.Arm64, "libiowkit_linux_aarch64.so"),
       };
 
       var platformLibraryDictionary = new Dictionary<OSPlatform, string>()
