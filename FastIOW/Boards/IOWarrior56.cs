@@ -119,10 +119,6 @@ namespace Tederean.FastIOW
     public const int PWM_1 = P6_7;
     public const int PWM_2 = P6_0;
 
-    public const int BUILDIN_LED = P6_7;
-
-    public const int BUILDIN_BUTTON = P6_0;
-
 
     internal IOWarrior56(IntPtr handle) : base(handle)
     {

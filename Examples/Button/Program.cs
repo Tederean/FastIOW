@@ -10,23 +10,23 @@ namespace Button
 
     private static readonly Dictionary<IOWarriorType, int> LedDefinitions = new Dictionary<IOWarriorType, int>()
     {
-      { IOWarriorType.IOWarrior40, IOWarrior40.BUILDIN_LED0 },
-      { IOWarriorType.IOWarrior24, IOWarrior24.BUILDIN_LED },
-      { IOWarriorType.IOWarrior56, IOWarrior56.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28, IOWarrior28.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_1 }
+      { IOWarriorType.IOWarrior40, IOWarrior40.P3_0 },
+      { IOWarriorType.IOWarrior24, IOWarrior24.P0_3 },
+      { IOWarriorType.IOWarrior56, IOWarrior56.P6_7 },
+      { IOWarriorType.IOWarrior28, IOWarrior28.P2_0 },
+      { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_0 }
     };
 
     private static readonly Dictionary<IOWarriorType, int> ButtonDefinitions = new Dictionary<IOWarriorType, int>()
     {
-      { IOWarriorType.IOWarrior40, IOWarrior40.BUILDIN_BUTTON },
+      { IOWarriorType.IOWarrior40, IOWarrior40.P0_0 },
       { IOWarriorType.IOWarrior24, IOWarrior24.P0_0 },
-      { IOWarriorType.IOWarrior56, IOWarrior56.BUILDIN_BUTTON },
-      { IOWarriorType.IOWarrior28, IOWarrior28.BUILDIN_BUTTON },
+      { IOWarriorType.IOWarrior56, IOWarrior56.P6_0 },
+      { IOWarriorType.IOWarrior28, IOWarrior28.P2_1 },
       { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_0 }
     };
 
-    // This example lights up buildin LED as long a pushbutton is pressed. See above for pin definitions.
+    // This example lights up a LED as long a pushbutton is pressed. See above for pin definitions. 
     static void Main(string[] args)
     {
       FastIOW.OpenConnection();

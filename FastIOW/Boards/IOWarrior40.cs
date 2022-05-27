@@ -56,17 +56,6 @@ namespace Tederean.FastIOW
     public const int I2C_SCL = P0_6;
     public const int I2C_SDA = P0_7;
 
-    public const int BUILDIN_BUTTON = P0_0;
-
-    public const int BUILDIN_LED0 = P3_0;
-    public const int BUILDIN_LED1 = P3_1;
-    public const int BUILDIN_LED2 = P3_2;
-    public const int BUILDIN_LED3 = P3_3;
-    public const int BUILDIN_LED4 = P3_4;
-    public const int BUILDIN_LED5 = P3_5;
-    public const int BUILDIN_LED6 = P3_6;
-    public const int BUILDIN_LED7 = P3_7;
-
 
     internal IOWarrior40(IntPtr handle) : base(handle)
     {

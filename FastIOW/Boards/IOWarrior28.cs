@@ -73,10 +73,6 @@ namespace Tederean.FastIOW
     public const int Pin_25 = P0_0;
     public const int Pin_26 = P0_1;
 
-    public const int BUILDIN_LED = P2_0;
-
-    public const int BUILDIN_BUTTON = P2_1;
-
 
     internal IOWarrior28(IntPtr handle) : base(handle)
     {

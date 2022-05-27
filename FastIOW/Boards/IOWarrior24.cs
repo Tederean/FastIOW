@@ -53,8 +53,6 @@ namespace Tederean.FastIOW
     public const int Timer_1 = P0_0;
     public const int Timer_2 = P0_1;
 
-    public const int BUILDIN_LED = P0_3;
-
 
     internal IOWarrior24(IntPtr handle) : base(handle)
     {

@@ -11,10 +11,10 @@ namespace Blink
 
     private static readonly Dictionary<IOWarriorType, int> LedDefinitions = new Dictionary<IOWarriorType, int>()
     {
-      { IOWarriorType.IOWarrior40, IOWarrior40.BUILDIN_LED0 },
-      { IOWarriorType.IOWarrior24, IOWarrior24.BUILDIN_LED },
-      { IOWarriorType.IOWarrior56, IOWarrior56.BUILDIN_LED },
-      { IOWarriorType.IOWarrior28, IOWarrior28.BUILDIN_LED },
+      { IOWarriorType.IOWarrior40, IOWarrior40.P3_0 },
+      { IOWarriorType.IOWarrior24, IOWarrior24.P0_3 },
+      { IOWarriorType.IOWarrior56, IOWarrior56.P6_7 },
+      { IOWarriorType.IOWarrior28, IOWarrior28.P2_0 },
       { IOWarriorType.IOWarrior28L, IOWarrior28L.P0_0 }
     };
 
