@@ -82,7 +82,7 @@ namespace Tederean.FastIOW.Internal
     {
       lock (IOWarriorBase.SyncObject)
       {
-        var result = WriteBytesInternal(address);
+        var result = WriteBytesInternal(address, data);
 
         if (result[1].GetBit(7))
         {
