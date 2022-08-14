@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using Tederean.FastIOW;
 
@@ -64,26 +65,93 @@ namespace I2C_BME280
 
     public float ReadTemperature()
     {
-      float var1, var2;
+      int var1, var2;
 
       int adc_T = Read3BytesSigned(BME280Register.TEMPDATA);
 
       if (adc_T == 0x800000) // value in case temp measurement was disabled
         return float.NaN;
-
       adc_T >>= 4;
 
-      var1 = ((adc_T / 8.0f) - (m_Coefficients.T1 * 2.0f));
-      var1 = (var1 * (m_Coefficients.T2)) / 2048.0f;
-      var2 = ((adc_T / 16) - (m_Coefficients.T1));
-      var2 = (((var2 * var2) / 4096.0f) * (m_Coefficients.T3)) / 16384.0f;
+      var1 = (int)((adc_T / 8) - ((int)m_Coefficients.T1 * 2));
+      var1 = (var1 * ((int)m_Coefficients.T2)) / 2048;
+      var2 = (int)((adc_T / 16) - ((int)m_Coefficients.T1));
+      var2 = (((var2 * var2) / 4096) * ((int)m_Coefficients.T3)) / 16384;
 
-      t_fine = (int)(var1 + var2 + t_fine_adjust);
+      t_fine = var1 + var2 + t_fine_adjust;
 
-      var T = (t_fine * 5.0f + 128.0f) / 256.0f;
+      int T = (t_fine * 5 + 128) / 256;
 
-      return T / 100.0f;
+      return (float)T / 100.0f;
     }
+
+    public float ReadPressure()
+    {
+      long var1, var2, var3, var4;
+
+      ReadTemperature(); // must be done first to get t_fine
+
+      int adc_P = Read3BytesSigned(BME280Register.PRESSUREDATA);
+      if (adc_P == 0x800000) // value in case pressure measurement was disabled
+        return float.NaN;
+      adc_P >>= 4;
+
+      var1 = ((long)t_fine) - 128000;
+      var2 = var1 * var1 * (long)m_Coefficients.P6;
+      var2 = var2 + ((var1 * (long)m_Coefficients.P5) * 131072);
+      var2 = var2 + (((long)m_Coefficients.P4) * 34359738368);
+      var1 = ((var1 * var1 * (long)m_Coefficients.P3) / 256) +
+             ((var1 * ((long)m_Coefficients.P2) * 4096));
+      var3 = ((long)1) * 140737488355328;
+      var1 = (var3 + var1) * ((long)m_Coefficients.P1) / 8589934592;
+
+      if (var1 == 0)
+      {
+        return 0; // avoid exception caused by division by zero
+      }
+
+      var4 = 1048576 - adc_P;
+      var4 = (((var4 * 2147483648) - var2) * 3125) / var1;
+      var1 = (((long)m_Coefficients.P9) * (var4 / 8192) * (var4 / 8192)) /
+             33554432;
+      var2 = (((long)m_Coefficients.P8) * var4) / 524288;
+      var4 = ((var4 + var1 + var2) / 256) + (((long)m_Coefficients.P7) * 16);
+
+      float P = var4 / 256.0f;
+
+      return P;
+    }
+
+    public float ReadHumidity()
+    {
+      int var1, var2, var3, var4, var5;
+
+      ReadTemperature(); // must be done first to get t_fine
+
+      int adc_H = Read3BytesSigned(BME280Register.HUMIDDATA);
+      if (adc_H == 0x8000) // value in case humidity measurement was disabled
+        return float.NaN;
+
+      var1 = t_fine - ((int)76800);
+      var2 = (int)(adc_H * 16384);
+      var3 = (int)(((int)m_Coefficients.H4) * 1048576);
+      var4 = ((int)m_Coefficients.H5) * var1;
+      var5 = (((var2 - var3) - var4) + (int)16384) / 32768;
+      var2 = (var1 * ((int)m_Coefficients.H6)) / 1024;
+      var3 = (var1 * ((int)m_Coefficients.H3)) / 2048;
+      var4 = ((var2 * (var3 + (int)32768)) / 1024) + (int)2097152;
+      var2 = ((var4 * ((int)m_Coefficients.H2)) + 8192) / 16384;
+      var3 = var5 * var2;
+      var4 = ((var3 / 32768) * (var3 / 32768)) / 128;
+      var5 = var3 - ((var4 * ((int)m_Coefficients.H1)) / 16);
+      var5 = (var5 < 0 ? 0 : var5);
+      var5 = (var5 > 419430400 ? 419430400 : var5);
+      uint H = (uint)(var5 / 4096);
+
+      return (float)H / 1024.0f;
+    }
+
+
 
 
     private void SetSampling(SensorMode mode = SensorMode.MODE_NORMAL, SensorSampling tempSampling = SensorSampling.SAMPLING_X16, SensorSampling pressSampling = SensorSampling.SAMPLING_X16, SensorSampling humSampling = SensorSampling.SAMPLING_X16, SensorFilter filter = SensorFilter.FILTER_OFF, StandbyDuration duration = StandbyDuration.STANDBY_MS_0_5)
@@ -104,6 +172,7 @@ namespace I2C_BME280
       // you must make sure to also set REGISTER_CONTROL after setting the
       // CONTROLHUMID register, otherwise the values won't be applied (see
       // DS 5.4.3)
+
       m_I2C.WriteBytes((byte)m_Address, (byte)BME280Register.CONTROLHUMID, m_ControlHumidity.Get());
       m_I2C.WriteBytes((byte)m_Address, (byte)BME280Register.CONFIG, m_Config.Get());
       m_I2C.WriteBytes((byte)m_Address, (byte)BME280Register.CONTROL, m_ControlMeasurement.Get());
@@ -145,25 +214,27 @@ namespace I2C_BME280
     {
       m_I2C.WriteBytes((byte)m_Address, (byte)register);
 
-      return m_I2C.Read2Bytes((byte)m_Address);
+      var result = m_I2C.ReadBytes((byte)m_Address, 2);
+
+      return (ushort)((result[1] << 8) + result[0]);
     }
 
     private short Read2BytesSigned(BME280Register register)
     {
       m_I2C.WriteBytes((byte)m_Address, (byte)register);
 
-      var value = m_I2C.Read2Bytes((byte)m_Address);
+      var result = m_I2C.ReadBytes((byte)m_Address, 2);
 
-      return BitConverter.ToInt16(BitConverter.GetBytes(value), 0);
+      return (short)((result[1] << 8) + result[0]);
     }
 
     private int Read3BytesSigned(BME280Register register)
     {
       m_I2C.WriteBytes((byte)m_Address, (byte)register);
 
-      var value = m_I2C.Read3Bytes((byte)m_Address);
+      var result = m_I2C.ReadBytes((byte)m_Address, 3);
 
-      return BitConverter.ToInt32(BitConverter.GetBytes(value), 0);
+      return BitConverter.ToInt32(new byte[] { result[2], result[1], result[0], 0x00 }, 0);
     }
 
     private byte ReadByte(BME280Register register)
