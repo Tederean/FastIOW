@@ -63,7 +63,7 @@ namespace Tederean.FastIOW.Internal
     {
       lock (IOWarriorBase.SyncObject)
       {
-        var result = WriteBytesInternal(address);
+        var result = WriteBytesInternal(address, Array.Empty<byte>());
 
         // Error while writing data.
         if (result[1].GetBit(7)) return false;
@@ -99,7 +99,7 @@ namespace Tederean.FastIOW.Internal
       }
     }
 
-    private byte[] WriteBytesInternal(byte address, params byte[] data)
+    private byte[] WriteBytesInternal(byte address, byte[] data)
     {
       if (!Enabled) throw new InvalidOperationException("I2C interface is not enabled.");
       if (address.GetBit(7)) throw new ArgumentException("Illegal I2C Address: " + string.Format("0x{0:X2}", address));
