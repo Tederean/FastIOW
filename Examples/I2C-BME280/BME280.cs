@@ -117,7 +117,7 @@ namespace I2C_BME280
       var2 = (((long)m_Coefficients.P8) * var4) / 524288;
       var4 = ((var4 + var1 + var2) / 256) + (((long)m_Coefficients.P7) * 16);
 
-      float P = var4 / 256.0f;
+      float P = var4 / 256.0f / 100.0f;
 
       return P;
     }
@@ -128,7 +128,10 @@ namespace I2C_BME280
 
       ReadTemperature(); // must be done first to get t_fine
 
-      int adc_H = Read3BytesSigned(BME280Register.HUMIDDATA);
+      // adc_H: 24972
+      // 47.53 %
+
+      int adc_H = Read2Bytes(BME280Register.HUMIDDATA);
       if (adc_H == 0x8000) // value in case humidity measurement was disabled
         return float.NaN;
 

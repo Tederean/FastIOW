@@ -34,7 +34,7 @@ namespace I2C_BME280
 
       m_TemperatureText.Text = $"{temperature} °C";
       m_HumdityText.Text = $"{humidity} %";
-      m_PressureText.Text = $"{pressure} hPa";
+      m_PressureText.Text = $"{pressure} mBar";
     }
   }
 }
