@@ -8,6 +8,10 @@ namespace I2C_BME280
   public partial class Form1 : Form
   {
 
+    // For mor accurate results use values from: https://kachelmannwetter.com/de/messwerte/luftdruck-qnh.html
+
+    private const float SealevelPressure_hPa = 1013.25f;
+
     private readonly BME280 bme280;
 
 
@@ -28,13 +32,15 @@ namespace I2C_BME280
 
     private void m_Button1_Click(object sender, System.EventArgs e)
     {
-      var temperature = bme280.ReadTemperature();
-      var humidity = bme280.ReadHumidity();
-      var pressure = bme280.ReadPressure();
+      var temperature_C = bme280.ReadTemperature_C();
+      var humidity_p = bme280.ReadHumidity_Percent();
+      var pressure_mbar = bme280.ReadPressure_hPa() / 100.0f;
+      var altitude_m = bme280.ReadAltitude_m(SealevelPressure_hPa);
 
-      m_TemperatureText.Text = $"{temperature} °C";
-      m_HumdityText.Text = $"{humidity} %";
-      m_PressureText.Text = $"{pressure} mBar";
+      m_TemperatureText.Text = $"{temperature_C} °C";
+      m_HumdityText.Text = $"{humidity_p} %";
+      m_PressureText.Text = $"{pressure_mbar} mBar";
+      m_AltitudeText.Text = $"{altitude_m} m";
     }
   }
 }

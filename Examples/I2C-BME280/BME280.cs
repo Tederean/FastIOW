@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using Tederean.FastIOW;
 
@@ -63,11 +62,11 @@ namespace I2C_BME280
     }
 
 
-    public float ReadTemperature()
+    public float ReadTemperature_C()
     {
       int var1, var2;
 
-      int adc_T = Read3BytesSigned(BME280Register.TEMPDATA);
+      int adc_T = Read3BytesSignedBigEndian(BME280Register.TEMPDATA);
 
       if (adc_T == 0x800000) // value in case temp measurement was disabled
         return float.NaN;
@@ -85,13 +84,13 @@ namespace I2C_BME280
       return (float)T / 100.0f;
     }
 
-    public float ReadPressure()
+    public float ReadPressure_hPa()
     {
       long var1, var2, var3, var4;
 
-      ReadTemperature(); // must be done first to get t_fine
+      ReadTemperature_C(); // must be done first to get t_fine
 
-      int adc_P = Read3BytesSigned(BME280Register.PRESSUREDATA);
+      int adc_P = Read3BytesSignedBigEndian(BME280Register.PRESSUREDATA);
       if (adc_P == 0x800000) // value in case pressure measurement was disabled
         return float.NaN;
       adc_P >>= 4;
@@ -117,21 +116,18 @@ namespace I2C_BME280
       var2 = (((long)m_Coefficients.P8) * var4) / 524288;
       var4 = ((var4 + var1 + var2) / 256) + (((long)m_Coefficients.P7) * 16);
 
-      float P = var4 / 256.0f / 100.0f;
+      float P = var4 / 256.0f;
 
       return P;
     }
 
-    public float ReadHumidity()
+    public float ReadHumidity_Percent()
     {
       int var1, var2, var3, var4, var5;
 
-      ReadTemperature(); // must be done first to get t_fine
+      ReadTemperature_C(); // must be done first to get t_fine
 
-      // adc_H: 24972
-      // 47.53 %
-
-      int adc_H = Read2Bytes(BME280Register.HUMIDDATA);
+      int adc_H = Read2BytesBigEndian(BME280Register.HUMIDDATA);
       if (adc_H == 0x8000) // value in case humidity measurement was disabled
         return float.NaN;
 
@@ -154,7 +150,30 @@ namespace I2C_BME280
       return (float)H / 1024.0f;
     }
 
+    public float ReadAltitude_m(float seaLevelPRessure_hPa)
+    {
+      // Equation taken from BMP180 datasheet (page 16):
+      //  http://www.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
 
+      // Note that using the equation from wikipedia can give bad results
+      // at high altitude. See this thread for more information:
+      //  http://forums.adafruit.com/viewtopic.php?f=22&t=58064
+
+      var atmospheric = ReadPressure_hPa() / 100.0F;
+
+      return 44330.0f * (1.0f - (float)Math.Pow(atmospheric / seaLevelPRessure_hPa, 0.1903f));
+    }
+
+    public float GetTemperatureCompensation_C()
+    {
+      return ((t_fine_adjust * 5) >> 8) / 100.0f;
+    }
+
+    public void SetTemperatureCompensation(float adjustment_C)
+    {
+      // convert the value in C into and adjustment to t_fine
+      t_fine_adjust = ((int)(adjustment_C * 100.0f) << 8) / 5;
+    }
 
 
     private void SetSampling(SensorMode mode = SensorMode.MODE_NORMAL, SensorSampling tempSampling = SensorSampling.SAMPLING_X16, SensorSampling pressSampling = SensorSampling.SAMPLING_X16, SensorSampling humSampling = SensorSampling.SAMPLING_X16, SensorFilter filter = SensorFilter.FILTER_OFF, StandbyDuration duration = StandbyDuration.STANDBY_MS_0_5)
@@ -185,22 +204,22 @@ namespace I2C_BME280
     {
       return new Coefficients()
       {
-        T1 = Read2Bytes(BME280Register.T1),
-        T2 = Read2BytesSigned(BME280Register.T2),
-        T3 = Read2BytesSigned(BME280Register.T3),
+        T1 = Read2BytesLittleEndian(BME280Register.T1),
+        T2 = Read2BytesSignedLittleEndian(BME280Register.T2),
+        T3 = Read2BytesSignedLittleEndian(BME280Register.T3),
 
-        P1 = Read2Bytes(BME280Register.P1),
-        P2 = Read2BytesSigned(BME280Register.P2),
-        P3 = Read2BytesSigned(BME280Register.P3),
-        P4 = Read2BytesSigned(BME280Register.P4),
-        P5 = Read2BytesSigned(BME280Register.P5),
-        P6 = Read2BytesSigned(BME280Register.P6),
-        P7 = Read2BytesSigned(BME280Register.P7),
-        P8 = Read2BytesSigned(BME280Register.P8),
-        P9 = Read2BytesSigned(BME280Register.P9),
+        P1 = Read2BytesLittleEndian(BME280Register.P1),
+        P2 = Read2BytesSignedLittleEndian(BME280Register.P2),
+        P3 = Read2BytesSignedLittleEndian(BME280Register.P3),
+        P4 = Read2BytesSignedLittleEndian(BME280Register.P4),
+        P5 = Read2BytesSignedLittleEndian(BME280Register.P5),
+        P6 = Read2BytesSignedLittleEndian(BME280Register.P6),
+        P7 = Read2BytesSignedLittleEndian(BME280Register.P7),
+        P8 = Read2BytesSignedLittleEndian(BME280Register.P8),
+        P9 = Read2BytesSignedLittleEndian(BME280Register.P9),
 
         H1 = ReadByte(BME280Register.H1),
-        H2 = Read2BytesSigned(BME280Register.H2),
+        H2 = Read2BytesSignedLittleEndian(BME280Register.H2),
         H3 = ReadByte(BME280Register.H3),
         H4 = (short)(((sbyte)ReadByte(BME280Register.H4) << 4) | (ReadByte(BME280Register.H4 + 1) & 0xF)),
         H5 = (short)(((sbyte)ReadByte(BME280Register.H5 + 1) << 4) | (ReadByte(BME280Register.H5) >> 4)),
@@ -213,7 +232,7 @@ namespace I2C_BME280
       return ReadByte(BME280Register.STATUS).GetBit(0);
     }
 
-    private ushort Read2Bytes(BME280Register register)
+    private ushort Read2BytesLittleEndian(BME280Register register)
     {
       m_I2C.WriteBytes((byte)m_Address, (byte)register);
 
@@ -222,7 +241,7 @@ namespace I2C_BME280
       return (ushort)((result[1] << 8) + result[0]);
     }
 
-    private short Read2BytesSigned(BME280Register register)
+    private short Read2BytesSignedLittleEndian(BME280Register register)
     {
       m_I2C.WriteBytes((byte)m_Address, (byte)register);
 
@@ -231,7 +250,16 @@ namespace I2C_BME280
       return (short)((result[1] << 8) + result[0]);
     }
 
-    private int Read3BytesSigned(BME280Register register)
+    private ushort Read2BytesBigEndian(BME280Register register)
+    {
+      m_I2C.WriteBytes((byte)m_Address, (byte)register);
+
+      var result = m_I2C.ReadBytes((byte)m_Address, 2);
+
+      return (ushort)((result[0] << 8) + result[1]);
+    }
+
+    private int Read3BytesSignedBigEndian(BME280Register register)
     {
       m_I2C.WriteBytes((byte)m_Address, (byte)register);
 
